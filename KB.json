@@ -1,0 +1,135 @@
+{
+    "greeting": {
+        "patterns": [
+            "hi",
+            "hello",
+            "hey",
+            "good morning",
+            "good afternoon",
+            "good evening",
+            "yo",
+            "howdy",
+            "greetings",
+            "nice to meet you",
+            "you alright?",
+            "how are you?",
+            "whats up?"
+        ],
+        "responses": [
+            "Hello, how may I assist you today?"
+        ]
+    },
+    "goodbye": {
+        "patterns": [
+            "goodbye",
+            "bye",
+            "that is all",
+            "that's all",
+            "that was everything",
+            "that's everything",
+            "that is everything",
+            "cya",
+            "see you later",
+            "take care",
+            "talk to you later",
+            "farewell",
+            "so long",
+            "see you",
+            "catch you later",
+            "have a good day",
+            "laters"
+        ],
+        "responses": [
+            "Enjoy your travels, goodbye.",
+            "Thank you for using our service, take care."
+        ]
+    },
+    "thanks": {
+        "patterns": [
+            "thank you",
+            "much appreciated",
+            "thanks",
+            "appreciate it",
+            "thanks a lot",
+            "thanks a bunch",
+            "many thanks",
+            "thank you so much",
+            "i appreciate your help",
+            "we appreciate your help",
+            "thats really helpful",
+            "im very grateful",
+            "lifesaver"
+        ],
+        "responses": [
+            "Happy to help",
+            "You are welcome",
+            "Enjoy your travels!",
+            "Take care"
+        ]
+    },
+    "requests": {
+        "patterns": [
+            "i would like to book a ticket please"
+        ]
+    },
+    "requests_no_time_single": {
+        "patterns": [
+            "i would like to travel between and ",
+            "are there journeys between  and ?",
+            "i need to go from  to ",
+            "are there any journeys between  and ",
+            "i need a train from  to ",
+            "i want to go between  and ",
+            "im in  and i want to go to "
+        ],
+        "responses": [
+            "the cheapest next available journey from  to  is at  and costs £ purchase can be made here "
+
+        ]
+    },
+    "requests_from_no_time_single": {
+        "patterns": [
+            "i am travelling from ",
+            "i want to get a train from ",
+            "are there journeys from "
+        ],
+        "responses": [
+            "and where will you be travelling to today?"
+        ]
+    },
+    "requests_to_no_time_single": {
+        "patterns": [
+            "i want to go to ",
+            "are there journeys to ?",
+            "are there any trains to ?",
+            "find me a ticket to ",
+            "im going to ",
+            "i need a ticket to ",
+            "i need to go to ",
+            "im going to ",
+            "i would like to book a ticket to ",
+            "can you find me a ticket to ",
+            "can you give me a ticket to ",
+            "is there trains to "
+        ],
+        "responses": [
+            "and where will you be travelling from?"
+        ]
+    },
+    "requests_with_time_single": {
+        "patterns": [
+            "i want to go from  to  at ",
+            "i want to go to  from  at ",
+            "i need a ticket from  to  at ",
+            "i need a ticket to  from  at ",
+            "im going to  from  at ",
+            "im going from  to  at ",
+            "i want to leave  at  to go to ",
+            "i need to go to  at  from "
+        ],
+        "responses": [
+            "the cheapest ticket from  to  at  is £ and can be purchased here "
+        ]
+    }
+
+}

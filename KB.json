@@ -69,28 +69,41 @@
     },
     "requests_no_time": {
         "patterns": [
-            "I would like to travel between [location] and [location]",
-            "are there journeys between"
-
+            "i would like to travel between [location] and [location]",
+            "are there journeys between [location] and [location]?",
+            "i need to go from [location] to [location]",
+            "are there any journeys between [location] and [location]",
+            "i need a train from [location] to [location]",
+            "i want to go between [location] and [location]",
+            "im in [location] and i want to go to [location]"
         ],
         "responses": [
+            "the cheapest next available journey from [location] to [location] is at [time] and costs £[price] purchase can be made here [link]"
 
         ]
     },
     "requests_from_no_time": {
         "patterns": [
-
+            "i am travelling from [location]",
+            "i want to get a train from [location]",
+            "are there journeys from [location]"
         ],
         "responses": [
-
+            "and where will you be travelling to today?"
         ]
     },
     "requests_to_no_time": {
         "patterns": [
-
+            "i want to go to [location]",
+            "are there journeys to [location]?",
+            "are there any trains to [location]?",
+            "find me a ticket to [location]",
+            "im going to [location]",
+            "i need a ticket to [location]",
+            "i need to go to [location]"
         ],
         "responses": [
-
+            "and where will you be travelling from?"
         ]
     }
 

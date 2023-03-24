@@ -1,6 +1,8 @@
 import spacy
 import json
 import difflib
+
+
 nlp = spacy.load('en_core_web_sm')
 
 #loading place data
@@ -51,10 +53,31 @@ def get_closest_station_match(station):
                     break
         return return_stations
 
-def check_intent(sentence):
-    for intention_type in intents:
-        for sent in intents[intention_type]['patterns']:
-            print(sent)
+def check_intent(user_sentence):
+    #all_sents = [sent for intention_type in intents for sent in intents[intention_type]['patterns']]
 
-check_intent("hello how are you")
+    max_similarity = -1
+    most_similar_sentence = ""
+    intent = ""
+    doc1 = nlp(user_sentence)
+    for intention_type in intents:
+        for kb_sent in intents[intention_type]['patterns']:
+            doc2 = nlp(kb_sent)
+            similarity = doc1.similarity(doc2)
+            if similarity>max_similarity:
+                max_similarity = similarity
+                most_similar_sentence = kb_sent
+                intent = intention_type
+
+    print(max_similarity)
+    print(most_similar_sentence)
+    print(intent)
+
+
+while True:
+    imp = input("enter a sentence: ")
+    check_intent(imp)
+
+
+
 

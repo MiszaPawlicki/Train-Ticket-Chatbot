@@ -8,6 +8,7 @@ nlp = spacy.load('en_core_web_sm')
 #loading place data
 f = open('places.json')
 places = json.load(f)
+places_keys = list(places.keys())
 
 #loading station data
 f = open('stations.json')
@@ -54,6 +55,11 @@ def get_closest_station_match(station):
         return return_stations
 
 def check_intent(user_sentence):
+
+    '''
+        A function to take a user sentence and infer the intention of the user using info in KB.json
+    '''
+
     #all_sents = [sent for intention_type in intents for sent in intents[intention_type]['patterns']]
 
     max_similarity = -1
@@ -69,14 +75,19 @@ def check_intent(user_sentence):
                 most_similar_sentence = kb_sent
                 intent = intention_type
 
-    print(max_similarity)
-    print(most_similar_sentence)
-    print(intent)
+
+    #print(max_similarity)
+    #print(most_similar_sentence)
+    #print(intent)
+    return intent
+
+
 
 
 while True:
     imp = input("enter a sentence: ")
     check_intent(imp)
+
 
 
 

@@ -69,7 +69,18 @@
     },
     "requests": {
         "patterns": [
-            "i would like to book a ticket please"
+            "i would like to book a ticket please",
+            "can you find me train tickets please",
+            "can you find me a train ticket",
+            "i would like to take a trip",
+            "find me a ticket",
+            "im going on a trip",
+            "i want to take the train",
+            "i need help with my ticket search",
+            "give me the cheapeast ticket"
+        ],
+        "responses": [
+            "I can help with that, when and where will you be travelling to and from?"
         ]
     },
     "requests_no_time_single": {
@@ -129,6 +140,17 @@
         ],
         "responses": [
             "the cheapest ticket from  to  at  is £ and can be purchased here "
+        ]
+    },
+    "requests_with_time_return": {
+        "patterns": [
+            "i want to go to  from  at  and return on",
+            "find me tickets to  from  at  and come back at ",
+            "are there trains from  to  at  and return at ",
+            "im planning on going to  from  at  and returning on"
+        ],
+        "responses": [
+            "the cheapest return ticket from  to  at  is £ and can be purchased here "
         ]
     }
 

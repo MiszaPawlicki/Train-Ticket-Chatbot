@@ -10,7 +10,7 @@ places = json.load(f)
 #loading station data
 f = open('stations.json')
 stations = json.load(f)
-station_names = [i['stationName'] for i in stations]
+station_names = [i['stationName'].lower() for i in stations]
 
 #
 def lemmatize_and_clean(text):
@@ -22,12 +22,24 @@ def lemmatize_and_clean(text):
     return out.strip()
 
 #find closest match
-
-
-def get_closest_station_matches(station):
-    print(difflib.get_close_matches(station,station_names))
+def get_closest_station_match(station):
+    closest_matches = difflib.get_close_matches(station,station_names)
+    score = difflib.SequenceMatcher(None, station, closest_matches[0]).ratio()
+    print(closest_matches)
+    print(score)
+    if score>0.9:
+        for i in stations:
+            if i['stationName'].lower() == closest_matches[0]:
+                print(i)
+                break
+    else:
+        for m in closest_matches:
+            for i in stations:
+                if i['stationName'].lower() == m:
+                    print(i)
+                    break
 
 while True:
     s = input("enter a station name: ")
-    get_closest_station_matches(s)
+    get_closest_station_match(s)
 

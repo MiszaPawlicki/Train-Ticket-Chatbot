@@ -5,11 +5,6 @@ import difflib
 
 nlp = spacy.load('en_core_web_sm')
 
-#loading place data
-f = open('places.json')
-places = json.load(f)
-places_keys = list(places.keys())
-
 #loading station data
 f = open('stations.json')
 stations = json.load(f)
@@ -85,8 +80,8 @@ def check_intent(user_sentence):
 
 
 while True:
-    imp = input("enter a sentence: ")
-    check_intent(imp)
+    user_input = input("enter a sentence: ")
+    print(check_intent(user_input))
 
 
 

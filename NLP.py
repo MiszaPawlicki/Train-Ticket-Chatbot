@@ -1,9 +1,18 @@
 import spacy
-
+import json
+import difflib
 nlp = spacy.load('en_core_web_sm')
 
-user_input = input("Enter a command: \n")
+#loading place data
+f = open('places.json')
+places = json.load(f)
 
+#loading station data
+f = open('stations.json')
+stations = json.load(f)
+station_names = [i['stationName'] for i in stations]
+
+#
 def lemmatize_and_clean(text):
     doc = nlp(text.lower())
     out = ""
@@ -12,4 +21,13 @@ def lemmatize_and_clean(text):
             out = out + token.lemma_ + " "
     return out.strip()
 
-print(lemmatize_and_clean(user_input))
+#find closest match
+
+
+def get_closest_station_matches(station):
+    print(difflib.get_close_matches(station,station_names))
+
+while True:
+    s = input("enter a station name: ")
+    get_closest_station_matches(s)
+

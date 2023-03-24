@@ -1,0 +1,97 @@
+{
+    "greeting": {
+        "patterns": [
+            "hi",
+            "hello",
+            "hey",
+            "good morning",
+            "good afternoon",
+            "good evening",
+            "yo",
+            "howdy",
+            "greetings",
+            "nice to meet you",
+            "you alright?",
+            "how are you?",
+            "whats up?"
+        ],
+        "responses": [
+            "Hello, how may I assist you today?"
+        ]
+    },
+    "goodbye": {
+        "patterns": [
+            "goodbye",
+            "bye",
+            "that is all",
+            "that's all",
+            "that was everything",
+            "that's everything",
+            "that is everything",
+            "cya",
+            "see you later",
+            "take care",
+            "talk to you later",
+            "farewell",
+            "so long",
+            "see you",
+            "catch you later",
+            "have a good day",
+            "laters"
+        ],
+        "responses": [
+            "Enjoy your travels, goodbye.",
+            "Thank you for using our service, take care."
+        ]
+    },
+    "thanks": {
+        "patterns": [
+            "thank you",
+            "much appreciated",
+            "thanks",
+            "appreciate it",
+            "thanks a lot",
+            "thanks a bunch",
+            "many thanks",
+            "thank you so much",
+            "i appreciate your help",
+            "we appreciate your help",
+            "thats really helpful",
+            "im very grateful",
+            "lifesaver"
+        ],
+        "responses": [
+            "Happy to help",
+            "You are welcome",
+            "Enjoy your travels!",
+            "Take care"
+        ]
+    },
+    "requests_no_time": {
+        "patterns": [
+            "I would like to travel between [location] and [location]",
+            "are there journeys between"
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "requests_from_no_time": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "requests_to_no_time": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    }
+
+}

@@ -69,7 +69,18 @@
     },
     "requests": {
         "patterns": [
-            "i would like to book a ticket please"
+            "i would like to book a ticket please",
+            "can you find me train tickets please",
+            "can you find me a train ticket",
+            "i would like to take a trip",
+            "find me a ticket",
+            "im going on a trip",
+            "i want to take the train",
+            "i need help with my ticket search",
+            "give me the cheapeast ticket"
+        ],
+        "responses": [
+            "I can help with that, when and where will you be travelling to and from?"
         ]
     },
     "requests_no_time_single": {

@@ -1,5 +1,4 @@
 import random
-
 import nltk
 import spacy
 import json
@@ -72,9 +71,9 @@ def check_intent(user_sentence):
                 max_similarity = similarity
                 most_similar_sentence = kb_sent
                 intent = intention_type
-
+    print(max_similarity)
     #if not sure of intent
-    if(max_similarity<0.4):
+    if(max_similarity<0.65):
         return None
 
     return intent
@@ -105,37 +104,31 @@ def get_response(intent):
     '''
     responses = intents[intent]['responses']
     response = random.choice(responses)
+    print(responses)
+    print(response)
     return response
 
-
-def converse():
+def generate_response(user_input):
     '''
         Function that takes userinput and prints what it determines to be a suitable response based on the
         input intent
     '''
-    user_input = input("Hello, how may I help?: \n")
+
     intent = check_intent(user_input)
+    print(intent)
+    if(not intent):
+        return "I'm sorry, I don't understand."
+    else:
+        if(intent=="goodbye"):
+            # if the intent is to end the conversation, the loop is exited using break
+            response = str(get_response(intent))
+            return response
 
-    while(True):
-        if(not intent):
-            print("I'm sorry, I don't understand.")
+        elif(intent=="greeting"):
+            response = str(get_response(intent))
+            return response
         else:
-            if(intent=="goodbye"):
-                # if the intent is to end the conversation, the loop is exited using break
-                print(get_response(intent))
-                break
-            elif(intent=="greetings"):
-                print(get_response(intent))
-            else:
-                # else the most suitable response is printed
-                print(intent)
-                print(get_response(intent))
-                print(find_station_in_sentence(user_input))
+            # else the most suitable response is printed
+            return str(find_station_in_sentence(user_input))
 
 
-        #new user input gathered for next iteration of the while loop
-        user_input = input()
-        intent = check_intent(user_input)
-
-#running the main function
-converse()

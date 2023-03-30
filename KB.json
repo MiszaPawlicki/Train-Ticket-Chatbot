@@ -85,24 +85,24 @@
     },
     "requests_no_time_single": {
         "patterns": [
-            "i would like to travel between and ",
-            "are there journeys between  and ?",
-            "i need to go from  to ",
-            "are there any journeys between  and ",
-            "i need a train from  to ",
-            "i want to go between  and ",
-            "im in  and i want to go to "
+            "i would like to travel between #origin and #destination",
+            "are there journeys between #origin and #destination?",
+            "i need to go from #origin to #destination",
+            "are there any journeys between #origin and #destination",
+            "i need a train from #origin to #destination",
+            "i want to go between #origin and #destination",
+            "im in #origin and i want to go to #destination"
         ],
         "responses": [
-            "the cheapest next available journey from  to  is at  and costs £ purchase can be made here "
+            "the cheapest next available journey from #origin to #destination is at #leave_time and costs £#price purchase can be made here "
 
         ]
     },
     "requests_from_no_time_single": {
         "patterns": [
-            "i am travelling from ",
-            "i want to get a train from ",
-            "are there journeys from "
+            "i am travelling from #origin",
+            "i want to get a train from #origin",
+            "are there journeys from #origin"
         ],
         "responses": [
             "and where will you be travelling to today?"
@@ -110,18 +110,18 @@
     },
     "requests_to_no_time_single": {
         "patterns": [
-            "i want to go to ",
-            "are there journeys to ?",
-            "are there any trains to ?",
-            "find me a ticket to ",
-            "im going to ",
-            "i need a ticket to ",
-            "i need to go to ",
-            "im going to ",
-            "i would like to book a ticket to ",
-            "can you find me a ticket to ",
-            "can you give me a ticket to ",
-            "is there trains to "
+            "i want to go to #destination",
+            "are there journeys to #destination?",
+            "are there any trains to #destination?",
+            "find me a ticket to #destination",
+            "im going to #destination",
+            "i need a ticket to #destination",
+            "i need to go to #destination",
+            "im going to #destination",
+            "i would like to book a ticket to #destination",
+            "can you find me a ticket to #destination",
+            "can you give me a ticket to #destination",
+            "is there trains to #destination"
         ],
         "responses": [
             "and where will you be travelling from?"
@@ -129,28 +129,28 @@
     },
     "requests_with_time_single": {
         "patterns": [
-            "i want to go from  to  at ",
-            "i want to go to  from  at ",
-            "i need a ticket from  to  at ",
-            "i need a ticket to  from  at ",
-            "im going to  from  at ",
-            "im going from  to  at ",
-            "i want to leave  at  to go to ",
-            "i need to go to  at  from "
+            "i want to go from #origin to #destination at #leave_time",
+            "i want to go to #destination from #origin at #leave_time",
+            "i need a ticket from #origin to #destination at #leave_time",
+            "i need a ticket to #destination from #origin at #leave_time",
+            "im going to #destination from #origin at #leave_time",
+            "im going from #origin to #destination at #leave_time",
+            "i want to leave #origin at #leave_time to go to #destination",
+            "i need to go to #destination at #leave_time from #origin"
         ],
         "responses": [
-            "the cheapest ticket from  to  at  is £ and can be purchased here "
+            "the cheapest ticket from #origin to #destination at #leave_time is £#price and can be purchased here "
         ]
     },
     "requests_with_time_return": {
         "patterns": [
-            "i want to go to  from  at  and return on",
-            "find me tickets to  from  at  and come back at ",
-            "are there trains from  to  at  and return at ",
-            "im planning on going to  from  at  and returning on"
+            "i want to go to #destination from #origin at #leave_time and return on #return_time",
+            "find me tickets to #destination from #origin at #leave_time and come back at #return_time",
+            "are there trains from #origin to #destination at #leave_time and return at #return_time",
+            "im planning on going to #destination from #origin at #leave_time and returning on #return_time"
         ],
         "responses": [
-            "the cheapest return ticket from  to  at  is £ and can be purchased here "
+            "the cheapest return ticket from #origin to #destination at #leave_time is £#price and can be purchased here "
         ]
     }
 

@@ -1,8 +1,11 @@
+import random
+
+import nltk
 import spacy
 import json
 import difflib
-
-
+from fuzzywuzzy import fuzz
+from nltk.util import ngrams
 nlp = spacy.load('en_core_web_sm')
 
 #loading station data
@@ -70,20 +73,69 @@ def check_intent(user_sentence):
                 most_similar_sentence = kb_sent
                 intent = intention_type
 
+    #if not sure of intent
+    if(max_similarity<0.4):
+        return None
 
-    #print(max_similarity)
-    #print(most_similar_sentence)
-    #print(intent)
     return intent
 
+def find_station_in_sentence(sentence):
+    #use ngrams to find nearest station
+
+    threshold = 90
+    matching_stations = []
+    # Loop through the list of train station names and compare each name to the input text
+    for station in station_names:
+        n = len(station.split())
+        sentence_ngrams = ngrams(sentence.split(), n)
+        for ngram in sentence_ngrams:
+            similarity_score = fuzz.token_sort_ratio(' '.join(ngram).lower(), station.lower())
+            if similarity_score >= threshold:
+                print(f"Match found: {station} - {similarity_score}")
+                matching_stations.append(station)
+
+    return [station for station in stations if station['stationName'].lower() in matching_stations]
 
 
 
-while True:
-    user_input = input("enter a sentence: ")
-    print(check_intent(user_input))
+
+def get_response(intent):
+    '''
+        Function that takes an intent and returns a random response for the intent as specified in the KB
+    '''
+    responses = intents[intent]['responses']
+    response = random.choice(responses)
+    return response
 
 
+def converse():
+    '''
+        Function that takes userinput and prints what it determines to be a suitable response based on the
+        input intent
+    '''
+    user_input = input("Hello, how may I help?: \n")
+    intent = check_intent(user_input)
+
+    while(True):
+        if(not intent):
+            print("I'm sorry, I don't understand.")
+        else:
+            if(intent=="goodbye"):
+                # if the intent is to end the conversation, the loop is exited using break
+                print(get_response(intent))
+                break
+            elif(intent=="greetings"):
+                print(get_response(intent))
+            else:
+                # else the most suitable response is printed
+                print(intent)
+                print(get_response(intent))
+                print(find_station_in_sentence(user_input))
 
 
+        #new user input gathered for next iteration of the while loop
+        user_input = input()
+        intent = check_intent(user_input)
 
+#running the main function
+converse()

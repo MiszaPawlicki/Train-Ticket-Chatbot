@@ -104,18 +104,17 @@ def get_response(intent):
     '''
     responses = intents[intent]['responses']
     response = random.choice(responses)
-    print(responses)
-    print(response)
+
     return response
 
 def generate_response(user_input):
     '''
-        Function that takes userinput and prints what it determines to be a suitable response based on the
+        Function that takes user_input and prints what it determines to be a suitable response based on the
         input intent
     '''
 
     intent = check_intent(user_input)
-    print(intent)
+
     if(not intent):
         return "I'm sorry, I don't understand."
     else:

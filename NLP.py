@@ -5,7 +5,6 @@ import re
 import nltk
 import spacy
 import json
-import difflib
 from fuzzywuzzy import fuzz
 from nltk.util import ngrams
 nlp = spacy.load('en_core_web_sm')

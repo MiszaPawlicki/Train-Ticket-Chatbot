@@ -1,16 +1,19 @@
-import pickle
+
 import random
 import re
-
+from datetime import datetime
 import nltk
 import spacy
 import json
 from fuzzywuzzy import fuzz
 from nltk.util import ngrams
+
+import scraper
+
 nlp = spacy.load('en_core_web_sm')
 from nltk.stem import WordNetLemmatizer
-lemmatizer = WordNetLemmatizer()
 
+lemmatizer = WordNetLemmatizer()
 
 #loading station data
 f = open('stations.json')
@@ -20,7 +23,6 @@ station_names = [i['stationName'].lower() for i in stations]
 #loading intent
 f = open('KB.json')
 intents = json.load(f)
-#
 
 def check_intent(user_sentence):
 
@@ -53,6 +55,9 @@ def check_intent(user_sentence):
         return None
 
     return intent
+
+
+
 
 def find_station_in_sentence(sentence):
     #use ngrams to find nearest station
@@ -113,15 +118,26 @@ def process_request(user_input,intent):
         #print(journey_details)
         if len(journey_details['origins'])==1:
             origin = journey_details['origins'][0]['stationName']
+            origin_crs_code = journey_details['origins'][0]['crsCode']
             response = response.replace("#origin", origin)
         if len(journey_details['destinations'])==1:
             destination = journey_details['destinations'][0]['stationName']
+            destination_crs_code = journey_details['destinations'][0]['crsCode']
             response = response.replace("#destination", destination)
+
+        scraper_info = scraper.scrape_ticket(origin_crs_code,destination_crs_code,datetime.now().strftime("%H%M"),"today")
+
+        response = response.replace("#leave_time", scraper_info['departure'])
+        response = response.replace("#price", scraper_info['price'])
+        response += scraper_info['url']
+
+
+
 
         return response
 
 
-    return None
+    return "no response implemented for: "+intent
 
 
 def get_response(intent):
@@ -139,7 +155,7 @@ def generate_response(user_input):
         input intent
     '''
 
-    intent = check_intent(user_input)
+    intent = predict_intent(user_input)#check_intent(user_input)
 
     if(not intent):
         return "I'm sorry, I don't understand."
@@ -155,8 +171,42 @@ def generate_response(user_input):
             response = process_request(user_input, intent)
             return response
 
+####NEURAL NETWORK####
+#load model data
+import pickle
+from keras.models import load_model
+import numpy as np
+words = pickle.load(open('words.pkl', 'rb'))
+classes = pickle.load(open('classes.pkl', 'rb'))
+model = load_model('model.h5')
+def predict_intent(user_input):
 
+    sent_words = nltk.word_tokenize(user_input)
+    sent_words = [lemmatizer.lemmatize(word) for word in sent_words]
+    bag = [0]*len(words)
+    for w in sent_words:
+        for i, word in enumerate(words):
+            if word == w:
+                bag[i] = 1
+    bow = np.array(bag)
+    res = model.predict(np.array([bow]))[0]
+    threshold = 0.2
+    results = [[i, r] for i, r in enumerate(res) if r>threshold]
+    results.sort(key=lambda x: x[1], reverse=True)
+    return_list = []
+    intent = None
+    probability = 0.75
+    for r in results:
+        return_list.append({'intent': classes[r[0]], 'probability': str(r[1])})
+        #print(classes[r[0]])
+        if r[1]>probability:
+            probability = r[1]
+            intent = classes[r[0]]
+    #print(intent)
+    #print(return_list)
+    return intent
+######################
 
-#user_input = input("enter a command:\n")
-print(generate_response("I need to go from brighton to norwich"))
-
+while True:
+    user_input = input("enter a command:\n")
+    print(generate_response(user_input))

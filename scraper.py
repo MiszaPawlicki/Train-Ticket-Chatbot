@@ -1,6 +1,4 @@
 from bs4 import BeautifulSoup
-from selenium import webdriver
-import chromedriver_binary
 import requests
 def scrape_ticket(origin, destination, departure_time, date):
     #time - format 1200

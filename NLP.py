@@ -116,14 +116,17 @@ def process_request(user_input,intent):
         return response
 
     elif(intent=='requests_no_time_no_origin_single'):
+
         #find destination station
         journey_details_destination = find_station_in_sentence(user_input)
+
         #ask for origin station
         user_input = input(get_response(intent) + '\n')
+
         #append destination and origin
         journey_details_origin = find_station_in_sentence(user_input)
+
         #for now assume no time specified
-        print(journey_details_origin)
         journey_details = {}
         journey_details['origins'] = journey_details_origin['unspecified']+journey_details_origin['origins']
         journey_details['destinations'] = journey_details_destination['destinations']

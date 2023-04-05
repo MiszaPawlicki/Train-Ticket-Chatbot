@@ -26,8 +26,8 @@ def cheapest_ticket(origin, destination, date, departure_time, ticket_type):
     # EXAMPLE URL = https://ojp.nationalrail.co.uk/service/timesandfares/NRW/BTN/140523/1630/dep
     url = url.replace("[ORIGIN]", origin)
     url = url.replace("[DESTINATION]", destination)
-    url = url.replace("[TIME]", departure_time)
-    url = url.replace("[DATE]", date)
+    url = url.replace("[TIME]", departure_time.strftime("%H%M"))
+    url = url.replace("[DATE]", date.strftime("%d%m%y"))
     get_national_rail = requests.get(url)
     soup = BeautifulSoup(get_national_rail.content, "html.parser")
 
@@ -57,7 +57,7 @@ def main():
 
 
 
-    cheapest_ticket("NRW", "KGX", date_value, time_value,"dep")
+    print(cheapest_ticket("NRW", "KGX", date_value, time_value,"dep"))
 
 
 if __name__ == "__main__":

@@ -60,6 +60,10 @@ def check_intent(user_sentence):
 
 
 def find_station_in_sentence(sentence):
+    '''
+        This function takes a string and checks through ngrams of varying lengths. If the similarity score
+        of an n-gram is above a threshold it can be assumed the ngram is a station name
+    '''
     #use ngrams to find nearest station
 
     threshold = 90
@@ -103,7 +107,6 @@ def infer_journey_times(user_input):
     return None
 
 
-
 def process_request(user_input,intent):
     '''
         Function to take a user_input and determine what details are in the sentence
@@ -130,6 +133,7 @@ def process_request(user_input,intent):
         journey_details = {}
         journey_details['origins'] = journey_details_origin['unspecified']+journey_details_origin['origins']
         journey_details['destinations'] = journey_details_destination['destinations']
+
         #call full_details function and get ticket info response
         return full_details_response(journey_details)
 
@@ -146,12 +150,10 @@ def full_details_response(journey_details):
 
     #replace origin and destination in response
     if len(journey_details['origins']) == 1:
-        origin = journey_details['origins'][0]['stationName']
-        origin_crs_code = journey_details['origins'][0]['crsCode']
+        origin_crs_code, origin = get_crs_and_station_name(journey_details,'origins')
         response = response.replace("#origin", origin)
     if len(journey_details['destinations']) == 1:
-        destination = journey_details['destinations'][0]['stationName']
-        destination_crs_code = journey_details['destinations'][0]['crsCode']
+        destination_crs_code, destination = get_crs_and_station_name(journey_details,'destinations')
         response = response.replace("#destination", destination)
 
     #get the train details using web scraping
@@ -163,6 +165,17 @@ def full_details_response(journey_details):
     response += "\n" + scraper_info['url']
 
     return response
+
+def get_crs_and_station_name(journey_details, origin_or_destination):
+    '''
+        journey details is a dict, place is either a string 'origins' or 'destinations'
+    '''
+    place = journey_details[origin_or_destination][0]['stationName']
+    # if station has mulltiple locations
+    crs_code = journey_details[origin_or_destination][0]['crsCode']
+    if crs_code.isdigit():
+        crs_code = place
+    return crs_code,place
 def get_response(intent):
     '''
         Function that takes an intent and returns a random response for the intent as specified in the KB
@@ -193,6 +206,8 @@ def generate_response(user_input):
         else:
             response = process_request(user_input, intent)
             return response
+
+
 
 ####NEURAL NETWORK####
 #load model data
@@ -232,4 +247,4 @@ def predict_intent(user_input):
 
 while True:
     user_input = input("enter a command:\n")
-    print(generate_response(user_input))
+    print(infer_journey_times(user_input))

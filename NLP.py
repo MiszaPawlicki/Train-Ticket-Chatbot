@@ -247,4 +247,4 @@ def predict_intent(user_input):
 
 while True:
     user_input = input("enter a command:\n")
-    print(infer_journey_times(user_input))
+    print(generate_response(user_input))

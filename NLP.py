@@ -1,13 +1,13 @@
 
 import random
-import re
-from datetime import datetime
 import nltk
 import spacy
 import json
 from fuzzywuzzy import fuzz
 from nltk.util import ngrams
-
+import re
+from datetime import datetime
+import datetime as dtime
 import scraper
 
 nlp = spacy.load('en_core_web_sm')
@@ -99,13 +99,181 @@ def find_station_in_sentence(sentence):
     return return_dict
 
 
-def infer_journey_times(user_input):
+def get_crs_and_station_name(journey_details, origin_or_destination):
     '''
-        A function to take a user input and return the times specified
+        journey details is a dict, place is either a string 'origins' or 'destinations'
     '''
+    place = journey_details[origin_or_destination][0]['stationName']
+    # if station has mulltiple locations
+    crs_code = journey_details[origin_or_destination][0]['crsCode']
+    if crs_code.isdigit():
+        crs_code = place
+    return crs_code,place
+def get_response(intent):
+    '''
+        Function that takes an intent and returns a random response for the intent as specified in the KB
+    '''
+    responses = intents[intent]['responses']
+    response = random.choice(responses)
+
+    return response
+
+#### TIME AND DATE FUNCTIONS ###
+
+def infer_time(user_input):
+    '''
+        Function to infer time from a user input, returns the time as a datetime object
+    '''
+    def convert_matches(regex, matches):
+        '''
+            Function to convert matches into datetime objects and return them all in a list
+        '''
+        return_list = []
+        for match in matches:
+            time = match
+            time_obj = datetime.strptime(time, regex)
+            return_list.append(time_obj.time())
+        return return_list
+
+    time_and_date = []
+
+    #am/pm
+    regex_12_hour = re.compile(r'\d{1,2}(?::\d{2})?\s*(?:a|p)m', re.IGNORECASE)
+    matches = re.findall(regex_12_hour, user_input)
+    time_and_date.extend(convert_matches("%I%p", matches))
+
+    #24 hour clock
+    regex_24_hour = re.compile(r"\b\d\d:\d\d\b", re.IGNORECASE)
+    matches = re.findall(regex_24_hour, user_input)
+
+    if matches:
+        time_and_date.extend(convert_matches("%H:%M",matches))
+
+    if time_and_date:
+        return time_and_date
+    return None
+
+
+
+def infer_date(user_input):
+    '''
+        Function to infer a date that may be in a user input, returns the date as a datetime object
+    '''
+    def create_date_object(year, month, day):
+        '''
+            Function to take year, month and day parameters to create a datetime object. If the date is in the
+            past, the next instance of the date is returned (365 days after the previous instance)
+        '''
+        date_object = dtime.datetime(year, month, day).date()
+        if datetime.today().month > date_object.month:
+            date_object = date_object + dtime.timedelta(days=365)
+        elif datetime.today().month == date_object.month and datetime.today().day > date_object.day:
+            date_object = date_object + dtime.timedelta(days=365)
+
+        return date_object
+
+    # dates
+    time_and_date = []
+    matches = []
+
+    #all regex patterns
+    regex_date_and_month = re.compile(r"\b(\d+)(st|nd|rd|th) of (\w+)\b")
+    regex_date = re.compile(r"\b(\d+)(st|nd|rd|th)")
+    regex_numeric_day_month = re.compile(r"(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|[1][0-2])")
+    regex_numeric_day_month_year = re.compile(r"(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|[1][0-2])/[0-9]+")
+
+    #find regex with date and month in format [num][st/nd/rd/th] of [month]
+    if (re.findall(regex_date_and_month, user_input)):
+        matches = re.findall(regex_date_and_month, user_input)
+        for match in matches:
+            #set day and month in user input
+            day = match[0]
+            month = match[2]
+
+            #create date object, store days and month in individual elements
+            date_object = datetime.strptime(day + " " + month, "%d %B").date()
+            date_object_month = date_object.month
+            date_object_day = date_object.day
+
+            #set year to current year
+            date_object = date_object.replace(year=datetime.today().year)
+
+            #if the date is in the past, set the year to when the date next occurs
+            if datetime.today().month>date_object_month:
+                date_object = date_object + dtime.timedelta(days=365)
+            elif datetime.today().month==date_object_month and datetime.today().day>date_object_day:
+                date_object = date_object + dtime.timedelta(days=365)
+
+            time_and_date.extend([date_object])
+    else:
+        #find all instances of just [num][st/nd/rd/th]
+        matches = re.findall(regex_date, user_input)
+        for match in matches:
+            day = int(match[0])
+            month = datetime.today().month
+            year = datetime.today().year
+            date_object = create_date_object(year,month,day)
+            time_and_date.extend([date_object])
+
+    #finding all instances of numerical day and months ie [num]/[num]
+    if(re.findall(regex_numeric_day_month,user_input)):
+        matches = re.findall(regex_numeric_day_month, user_input)
+        for match in matches:
+            day = int(match[0])
+            month = int(match[1])
+            year = datetime.today().year
+
+            date_object = create_date_object(year, month, day)
+            time_and_date.extend([date_object])
+
+    #finding all instances of numerical days with month and year eg [num]/[num]/[num]
+    elif (re.findall(regex_numeric_day_month_year, user_input)):
+        matches = re.findall(regex_numeric_day_month_year, user_input)
+        for match in matches:
+            day = int(match[0])
+            month = int(match[1])
+            year = int(match[3])
+
+            date_object = create_date_object(year, month, day)
+            time_and_date.extend([date_object])
+
+    # generic time expressions, i.e. 'tomorrow'
+    regex_tomorrow = re.compile(r"\btomorrow\b", re.IGNORECASE)
+    matches = re.findall(regex_tomorrow, user_input)
+    if matches:
+        tomorrow_dt = datetime.today() + dtime.timedelta(days=1)
+        time_and_date.extend([tomorrow_dt.date()])
+
+    if time_and_date:
+        return time_and_date
+    return None
+
+
+
+def infer_time_and_date(user_input):
+    '''
+    Function to call infer time and infer date and combine the return values
+    '''
+    time = infer_time(user_input)
+    date = infer_date(user_input)
+
+    if time and date:
+        if len(time)==1 and len(date)==1:
+            return {'date': date[0], 'time': time[0]}
+        return {'date': date, 'time': time}
+    elif date:
+        if(len(date)==1):
+            return {'date': date[0], 'time': None}
+        return {'date': date, 'time': None}
+    elif time:
+        if (len(time) == 1):
+            return {'date': None, 'time': time[0]}
+        return {'date': None, 'time': time}
 
     return None
 
+
+## MAIN FUNCTION ##
 
 def process_request(user_input,intent):
     '''
@@ -126,6 +294,9 @@ def process_request(user_input,intent):
         #ask for origin station
         user_input = input(get_response(intent) + '\n')
 
+        #get journey time and/or date
+        datetime_obj = infer_time_and_date(user_input)
+
         #append destination and origin
         journey_details_origin = find_station_in_sentence(user_input)
 
@@ -133,14 +304,15 @@ def process_request(user_input,intent):
         journey_details = {}
         journey_details['origins'] = journey_details_origin['unspecified']+journey_details_origin['origins']
         journey_details['destinations'] = journey_details_destination['destinations']
-
+        journey_details['departureDate'] = datetime_obj['date']
+        journey_details['departureTime'] = datetime_obj['time']
+        print(journey_details)
         #call full_details function and get ticket info response
         return full_details_response(journey_details)
 
 
 
     return "no response implemented for: "+intent
-
 def full_details_response(journey_details):
     '''
         for use in the process request function. When all details have been obtained, this
@@ -156,35 +328,23 @@ def full_details_response(journey_details):
         destination_crs_code, destination = get_crs_and_station_name(journey_details,'destinations')
         response = response.replace("#destination", destination)
 
+    #date and time info
+    date = "today"
+    time = datetime.now().strftime("%H%M")
+
+    if journey_details['departureDate']:
+        date = journey_details['departureDate'].strftime("%d%m%y")
+    if journey_details['departureTime']:
+        time = journey_details['departureTime'].strftime("%H%M")
+
     #get the train details using web scraping
-    scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,
-                                         "today",datetime.now().strftime("%H%M"))
+    scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,date,time)
     #append new details to response
     response = response.replace("#leave_time", scraper_info['departure'])
     response = response.replace("#price", scraper_info['price'])
     response += "\n" + scraper_info['url']
 
     return response
-
-def get_crs_and_station_name(journey_details, origin_or_destination):
-    '''
-        journey details is a dict, place is either a string 'origins' or 'destinations'
-    '''
-    place = journey_details[origin_or_destination][0]['stationName']
-    # if station has mulltiple locations
-    crs_code = journey_details[origin_or_destination][0]['crsCode']
-    if crs_code.isdigit():
-        crs_code = place
-    return crs_code,place
-def get_response(intent):
-    '''
-        Function that takes an intent and returns a random response for the intent as specified in the KB
-    '''
-    responses = intents[intent]['responses']
-    response = random.choice(responses)
-
-    return response
-
 def generate_response(user_input):
     '''
         Function that takes user_input and prints what it determines to be a suitable response based on the
@@ -237,7 +397,7 @@ def predict_intent(user_input):
     for r in results:
         return_list.append({'intent': classes[r[0]], 'probability': str(r[1])})
         #print(classes[r[0]])
-        if r[1]>probability:
+        if r[1] > probability:
             probability = r[1]
             intent = classes[r[0]]
     #print(intent)

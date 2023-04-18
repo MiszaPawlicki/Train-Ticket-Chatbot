@@ -17,7 +17,7 @@ sentence_10 = "i want to travel to london at 7am and return at 9pm"
 
 import re
 from datetime import datetime
-import datetime as d
+import datetime as dtime
 
 
 
@@ -65,11 +65,11 @@ def infer_date(user_input):
             Function to take year, month and day parameters to create a datetime object. If the date is in the
             past, the next instance of the date is returned (365 days after the previous instance)
         '''
-        date_object = d.datetime(year, month, day).date()
+        date_object = dtime.datetime(year, month, day).date()
         if datetime.today().month > date_object.month:
-            date_object = date_object + d.timedelta(days=365)
+            date_object = date_object + dtime.timedelta(days=365)
         elif datetime.today().month == date_object.month and datetime.today().day > date_object.day:
-            date_object = date_object + d.timedelta(days=365)
+            date_object = date_object + dtime.timedelta(days=365)
 
         return date_object
 
@@ -101,9 +101,9 @@ def infer_date(user_input):
 
             #if the date is in the past, set the year to when the date next occurs
             if datetime.today().month>date_object_month:
-                date_object = date_object+d.timedelta(days=365)
+                date_object = date_object + dtime.timedelta(days=365)
             elif datetime.today().month==date_object_month and datetime.today().day>date_object_day:
-                date_object = date_object + d.timedelta(days=365)
+                date_object = date_object + dtime.timedelta(days=365)
 
             time_and_date.extend([date_object])
     else:
@@ -142,7 +142,7 @@ def infer_date(user_input):
     regex_tomorrow = re.compile(r"\btomorrow\b", re.IGNORECASE)
     matches = re.findall(regex_tomorrow, user_input)
     if matches:
-        tomorrow_dt = datetime.today() + d.timedelta(days=1)
+        tomorrow_dt = datetime.today() + dtime.timedelta(days=1)
         time_and_date.extend([tomorrow_dt.date()])
 
     if time_and_date:

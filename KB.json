@@ -95,7 +95,11 @@
             "can you help with my travel arrangements",
             "can you help me book a ticket for a specific location and time",
             "could you provide me with prices on a train ticket please",
-            "i need to travel by train"
+            "i need to travel by train",
+            "can you find me the cheapest train ticket available",
+            "can you assist me with booking my train ticket",
+            "i need help with searching for a cheap ticket",
+            "i need to travel by train for my upcoming trip"
         ],
         "responses": [
             "I can help with that, when and where will you be travelling to and from?"
@@ -309,18 +313,46 @@
             "i need a return ticket to #destination from #origin leaving at #leave_time",
             "can i book a return ticket from #origin to #destination leaving at #leave_time and returning at #return_time",
             "can you help me find tickets to #destination departing from #origin leaving at #leave_time and returning at #return_time",
-            "im looking to travel from #origin to #destination leaving at #leave_time and returning at #return_time"
+            "im looking to travel from #origin to #destination leaving at #leave_time and returning at #return_time",
+            "i want a return ticket to #destination from #origin leaving at #leave_time and coming back at #return_time",
+            "i want a return ticket from #origin to #destination leaving at #leave_time and coming back at #return_time",
+            "i want a return ticket to #destination from #origin leaving at #leave_time and returning at #return_time",
+            "i want a return ticket from #origin to #destination leaving at #leave_time and returning at #return_time",
+            "book me a round-trip ticket from #origin to #destination departing at #leave_time and returning at #return_time",
+            "im interested in traveling to #destination from #origin at #leave_time and returning at #return_time can you assist me with booking tickets",
+            "i need to find a way to get from #origin to #destination at #leave_time and return at #return_time could you help me with that",
+            "what are my options for traveling from #origin to #destination at #leave_time and returning at #return_time",
+            "im looking for a return ticket to #destination from #origin departing at #leave_time and arriving back at #return_time can you help me with that",
+            "can you help me find the best price for a trip from #origin to #destination departing at #leave_time and returning at #return_time",
+            "id like to purchase a return ticket to #destination from #origin leaving at #leave_time and returning at #return_time",
+            "what are the available ticket options for a trip from #origin to #destination departing at #leave_time and returning at #return_time",
+            "could you assist me in booking a round-trip ticket from #origin to #destination with a departure at #leave_time and a return at #return_time",
+            "i need to travel from #origin to #destination at #leave_time and return at #return_time what are my ticket options",
+            "book me a return ticket to #destination from #origin at #leave_time and returning at #return_time",
+            "please help me find the best way to get from #origin to #destination at #leave_time and come back at #return_time",
+            "im interested in purchasing a return ticket from #origin to #destination leaving at #leave_time and returning at #return_time can you help me with that",
+            "what ticket options are there for a trip from #origin to #destination with a departure at #leave_time and a return at #return_time"
         ],
         "responses": [
-            "the cheapest return ticket from #origin to #destination at #leave_time is £#price and can be purchased here "
+            "the cheapest return ticket from #origin to #destination at #leave_time returning at #return_time is £#price and can be purchased here "
         ]
     },
     "requests_with_time_with_locations_return_different_day": {
         "patterns": [
-
+            "i want to travel from #origin to #destination leaving at #leave_time returning on #return_date at #return_time",
+            "please help find me a return ticket from #origin to #destination departing at #leave_time and returning on #return_date at #return_time",
+            "im interested in traveling from #origin to #destination leaving at #leave_time and coming back on #return_date at #return_time",
+            "i need a ticket from #origin to #destination leaving at #leave_time and returning on #return_date at #return_time",
+            "find me a round trip ticket from #origin to #destination departing at #leave_time and returning on #return_date at #return_time",
+            "could you please find me the best ticket for a trip to #destination from #origin leaving at #leave_time and coming back on #return_date at #return_time",
+            "please help me find tickets for a return trip from #origin to #destination leaving at #leave_time and returning on #return_date at #return_time",
+            "i am looking for train travel options from #origin to #destination departing at #leave_time and returning on #return_date at #return_time",
+            "can you find me a return ticket for #destination from #origin at #leave_time and returning on #return_date at #return_time",
+            "can you find me a return ticket from #origin to #destination departing at #leave_time and returning on #return_date at #return_time",
+            "please help me find a return ticket going to #destination from #origin at #leave_time coming back on #return_date at #return_time"
         ],
         "responses": [
-
+            "the cheapest return ticket from #origin to #destination matching those time constraints is £#price and can be purchased here "
         ]
     }
 

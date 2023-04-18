@@ -157,8 +157,8 @@ def full_details_response(journey_details):
         response = response.replace("#destination", destination)
 
     #get the train details using web scraping
-    scraper_info = scraper.scrape_ticket(origin_crs_code, destination_crs_code, datetime.now().strftime("%H%M"),
-                                         "today")
+    scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,
+                                         "today",datetime.now().strftime("%H%M"))
     #append new details to response
     response = response.replace("#leave_time", scraper_info['departure'])
     response = response.replace("#price", scraper_info['price'])

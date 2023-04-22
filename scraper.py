@@ -64,7 +64,7 @@ from selenium.webdriver.chrome.options import Options
 
 def cheapest_ticket(origin, destination, date, departure_time):
     """
-        Function that finds the cheapest ticket from start to destination using web scraping.
+        Function that finds the cheapest single ticket from start to destination using web scraping.
         :param origin: The starting location the user is going to get a train from. Location in abbreviation form for train
         e.g. Norwich is NRW
         :param destination: This is the location that the user is trying to get to
@@ -104,6 +104,70 @@ def cheapest_ticket(origin, destination, date, departure_time):
     #find_ticket_link(url)
 
     return {'price': cost, 'departure': actual_dep_time, 'arrival': actual_arrival_time, 'url': link}
+
+def finding_return_ticket_price(origin, destination, leave_date, leave_time, return_date, return_time):
+    """
+    Function that finds the cheapest return ticket from start to destination using web scraping.
+
+    :param origin:
+    :param destination:
+    :param leave_date:
+    :param return_date:
+    :param leave_time:
+    :param return_time:
+    :return:
+    """
+
+    url = "https://ojp.nationalrail.co.uk/service/timesandfares/[ORIGIN]/[DESTINATION]/[LEAVE_DATE]/[LEAVE_TIME]/dep/[RETURN_DATE]/[RETURN_TIME]/dep"
+
+    url = url.replace("[ORIGIN]", origin)
+    url = url.replace("[DESTINATION]", destination)
+    url = url.replace("[LEAVE_DATE]", leave_date)
+    url = url.replace("[LEAVE_TIME]", leave_time)
+    url = url.replace("[RETURN_DATE]", return_date)
+    url = url.replace("[RETURN_TIME]", return_time)
+
+    # try another url: examples
+    url = "https://ojp.nationalrail.co.uk/service/timesandfares/NRW/KGX/010523/1615/dep/030523/2330/dep"
+    #url = "https://ojp.nationalrail.co.uk/service/timesandfares/NRW/KGX/today/1615/dep/tomorrow/1630/dep"
+    print(url)
+
+    get_national_rail = requests.get(url)
+    soup = BeautifulSoup(get_national_rail.content, "html.parser")
+
+    cheapest_button = soup.find("button", {"id": "buyCheapestButton"})
+    cheapest = cheapest_button.find("span").text.strip()
+
+    both_cheapest = soup.findAll("td", {"class": "fare has-cheapest"})
+
+    ticket_section = both_cheapest[0].parent
+    predicted_leave_time = ticket_section.find("div", {"class": "dep"}).text.strip()
+    predicted_arrival_time = ticket_section.find("div", {"class": "arr"}).text.strip()
+
+    if both_cheapest.__len__() > 1:  # if it is two different tickets, there will be two tickets annotated with cheapest
+        ticket_section= both_cheapest[1].parent
+        predicted_r_leave_time = ticket_section.find("div", {"class": "dep"}).text.strip()
+        predicted_r_arrival_time = ticket_section.find("div", {"class": "arr"}).text.strip()
+
+
+    else:  # otherwise it is a return ticket
+        return_selected = soup.find("label", {"id":"returnFareLabel"})
+        return_ticket = return_selected.parent.parent.parent
+        predicted_r_leave_time = return_ticket.find("div", {"class": "dep"}).text.strip()
+        predicted_r_arrival_time = return_ticket.find("div", {"class": "arr"}).text.strip()
+
+    ticket_price = cheapest.split("£ ")[1]  # split the string where it states the price (there is also a space after £
+    print("Cheapest ticket is at --",ticket_price)
+    print("leave time: ", predicted_leave_time, "  arrival time: ", predicted_arrival_time, "\npredicted leave return"
+    "time: ", predicted_r_leave_time, " predicted arrival return time: ", predicted_r_arrival_time)
+
+
+
+    # select the span value in the button -> id = "buyCheapestButton"
+    # This is because it could have two single trains OR a return ticket selected as the cheapest option!!
+
+
+
 
 def find_ticket_link(url):
     driver = webdriver.Chrome()
@@ -200,6 +264,84 @@ def web_scraper_departure(url):
 
 
 
+
+#  --------- redundant code - cannot load both the leavind and arriving trains
+"""
+def web_scraper_return_ticket(url):  ####NOT THIS FUNCTION IT STINKS
+    print("do something similar to other function")
+    print(url)
+    options = Options()
+    # options.add_argument("--headless")  #TODO put this back in to make it headless!!!
+    driver = webdriver.Chrome(options=options)
+    driver.get(url)
+
+
+    WebDriverWait(driver, 20).until(expected_conditions.element_to_be_clickable(
+        ("xpath", "//button[@id = 'onetrust-accept-btn-handler']"))).click()
+
+    outwards_table = driver.find_element("xpath", "//table[@id = 'oft']")
+    inbound_table = driver.find_element("xpath","//table[@id = 'ift']")
+    while True:  # while loop contains going keep clicking the more tickets option until the next day appears for the outbound trains
+        time.sleep(1)
+        try:
+            o_dayheading = outwards_table.find_element("xpath", ".//*[@class='ajaxRow day-heading']")  # the next day is now on the page
+            break
+        except:
+            try:
+                driver.find_element("xpath", "//a[@href='/service/timesandfares/laterOutbound']").click()  # try and click the later bounds button
+                print("later tickets are found")
+            except:
+                pass
+
+        try:
+            driver.find_element("xpath", "//button[@id='fsrFocusFirst']").click()
+        except:
+            pass
+
+        try:
+            driver.find_element("xpath", "//button[@id='onetrust-accept-btn-handler']").click()
+        except:
+            pass
+
+        #try:
+        #    driver.find_element("xpath","//p[@class = 'popup-text'")
+
+        try:
+            driver.find_element("xpath", "//a[@href='#']").click()
+        except:
+            pass
+
+    while True:
+        time.sleep(1)
+        try:
+            i_dayheading = inbound_table.find_element("xpath", ".//*[@class='ajaxRow day-heading']")  # the next day is now on the page
+            print("break")
+            break
+        except:
+            try:
+                driver.find_element("xpath", "//a[@href='/service/timesandfares/laterInbound']").click()  # try and click the later bounds button
+                print("later inbound tickets are found")
+            except:
+                pass
+
+        #ajaxRow day-heading
+
+
+        try:
+            driver.find_element("xpath", "//button[@id='onetrust-accept-btn-handler']").click()
+        except:
+            pass
+        try:
+            driver.find_element("xpath", "//a[@href='#']").click()
+        except:
+            pass
+
+
+    time.sleep(10000)
+
+    #click onetrust-accept-btn-handler
+
+"""
 def main():
     #convert string into time object:
     time_string = "11:00"
@@ -215,10 +357,13 @@ def main():
 
 
 
-    print(cheapest_ticket("NRW", "KGX", date_value.strftime("%d%m%y"), time_value.strftime("%H%M")))
+    #print(cheapest_ticket("NRW", "KGX", date_value.strftime("%d%m%y"), time_value.strftime("%H%M")))
 
-    web_scraper_departure("https://ojp.nationalrail.co.uk/service/timesandfares/NRW/KGX/today/2030/dep")
+    #web_scraper_departure("https://ojp.nationalrail.co.uk/service/timesandfares/NRW/KGX/today/2030/dep")
+    #web_scraper_return_ticket("https://ojp.nationalrail.co.uk/service/timesandfares/NRW/KGX/today/1615/dep/250423/1815/dep")
+    finding_return_ticket_price("NRW", "KGX", "010523", "1615", "030523", "2030")
 
+    #button id = "buyCheapestButton"
 
 if __name__ == "__main__":
     main()

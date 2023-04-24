@@ -49,13 +49,15 @@ def scrape_ticket(origin, destination, departure_time, date):
 
 import time
 from datetime import datetime
+
+import chromedriver_binary
 import requests  # needs to be installed !!!
 from bs4 import BeautifulSoup  # needs to be installed !!!!
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-def cheapest_ticket(origin, destination, date, departure_time, ticket_type):
+def cheapest_ticket(origin, destination, date, departure_time):
     """
         Function that finds the cheapest ticket from start to destination using web scraping.
         :param origin: The starting location the user is going to get a train from. Location in abbreviation form for train
@@ -78,8 +80,8 @@ def cheapest_ticket(origin, destination, date, departure_time, ticket_type):
     # EXAMPLE URL = https://ojp.nationalrail.co.uk/service/timesandfares/NRW/BTN/140523/1630/dep
     url = url.replace("[ORIGIN]", origin)
     url = url.replace("[DESTINATION]", destination)
-    url = url.replace("[TIME]", departure_time.strftime("%H%M"))
-    url = url.replace("[DATE]", date.strftime("%d%m%y"))
+    url = url.replace("[TIME]", departure_time)
+    url = url.replace("[DATE]", date)
     get_national_rail = requests.get(url)
     soup = BeautifulSoup(get_national_rail.content, "html.parser")
 
@@ -90,12 +92,14 @@ def cheapest_ticket(origin, destination, date, departure_time, ticket_type):
     ticket_section = cheapest_section.parent
     actual_dep_time = ticket_section.find("div", {"class": "dep"}).text.strip()
     actual_arrival_time = ticket_section.find("div", {"class": "arr"}).text.strip()
-    link = find_ticket_link(url)
+    link = url#find_ticket_link(url)
 
-    return cost, actual_dep_time, actual_arrival_time, link
+    return {'price': cost, 'departure': actual_dep_time, 'arrival': actual_arrival_time, 'url': link}
 
 def find_ticket_link(url):
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    chromedriver_binary.add_chromedriver_to_path()
+    driver = webdriver.Chrome()
 
     driver.get(url)
     time.sleep(3)  # need to wait for the page to load, then accept the cookies
@@ -122,7 +126,7 @@ def main():
 
 
 
-    print(cheapest_ticket("NRW", "KGX", date_value, time_value,"dep"))
+    print(cheapest_ticket("NRW", "KGX", date_value, time_value))
 
 
 if __name__ == "__main__":

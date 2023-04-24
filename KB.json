@@ -249,7 +249,7 @@
             "can i book a ticket to travel to #destination from #origin at #leave_time",
             "what are my options from #origin to #destination leaving at #leave_time",
             "what are my options to #destination from #origin leaving at #leave_time",
-            "are there jounreys to #destination from #origin at #leave_time",
+            "are there journeys to #destination from #origin at #leave_time",
             "are there journeys from #origin to #destination at #leave_time",
             "are there any trains to #destination from #origin at #leave_time",
             "are there any trains from #origin to #destination at #leave_time",
@@ -290,7 +290,7 @@
             "i need to buy a ticket for the train to #destination from #origin at #leave_time",
             "can you find me a ticket to #destination from #origin at #leave_time",
             "can you find me a ticket from #origin to #destination at #leave_time",
-            "at #leave_time can you find me a tciket to #destination from #origin",
+            "at #leave_time can you find me a ticket to #destination from #origin",
             "at #leave_time can you find me a ticket from #origin to #destination",
             "can i buy a ticket for the train to #destination from #origin at #leave_time",
             "can i buy a ticket for the train from #origin to #destination at #leave_time",
@@ -300,7 +300,7 @@
             "im looking to purchase the #leave_time ticket for the train from #origin to #destination"
         ],
         "responses": [
-            "the cheapest ticket from #origin to #destination departing at #leave_time is £#price and can be purchased here "
+            "the cheapest ticket from #origin to #destination departing at #leave_time is #price and can be purchased here: "
         ]
     },
     "requests_with_time_with_locations_return_same_day": {

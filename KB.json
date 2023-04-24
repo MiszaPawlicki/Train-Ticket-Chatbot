@@ -4,6 +4,7 @@
             "hi",
             "hello",
             "hey",
+            "heya",
             "good morning",
             "good afternoon",
             "good evening",
@@ -21,7 +22,8 @@
             "sup",
             "top of the morning to you",
             "its a pleasure to meet you",
-            "hello there"
+            "hello there",
+            "wassup"
         ],
         "responses": [
             "Hello, how may I assist you today?"
@@ -353,6 +355,23 @@
         ],
         "responses": [
             "the cheapest return ticket from #origin to #destination matching those time constraints is £#price and can be purchased here "
+        ]
+    },
+    "delayed_train": {
+        "patterns": [
+            "my train is late",
+            "i think my trian is delayed",
+            "i think my train is late",
+            "my train is not here",
+            "my journey has been delayed",
+            "i have had a delay",
+            "when is my train going to get in now"
+        ],
+        "responses": [
+            "Which train are you currently on?",
+            "Where is your train at currently?",
+            "How long is the delay?",
+            "Where is your destination?"
         ]
     }
 

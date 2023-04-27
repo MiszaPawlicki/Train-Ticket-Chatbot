@@ -57,7 +57,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-def cheapest_ticket(origin, destination, date, departure_time):
+def cheapest_ticket(origin, destination, date, departure_time, return_date, return_time):
     """
         Function that finds the cheapest ticket from start to destination using web scraping.
         :param origin: The starting location the user is going to get a train from. Location in abbreviation form for train
@@ -66,6 +66,8 @@ def cheapest_ticket(origin, destination, date, departure_time):
         :param leave_date: The leaving date for train
         :param leave_time: The leaving time for train. Time needs to be in time of interval of 15 minutes: eg: 11:00,11:15,
         11:30 or 11:45
+        :param return_date : The return date for train.
+        :param return_time: The return time for train.
         :return: tuple that contains:
                 string of amount for cheapest ticket
                 string of leave time
@@ -82,6 +84,17 @@ def cheapest_ticket(origin, destination, date, departure_time):
     url = url.replace("[DESTINATION]", destination)
     url = url.replace("[TIME]", departure_time)
     url = url.replace("[DATE]", date)
+
+    #return details
+
+    if return_time and return_date:
+
+        url += '/[TIME]/[DATE]/dep'
+        url = url.replace('[DATE]', return_date)
+        url = url.replace('[TIME]', return_time)
+
+
+
     get_national_rail = requests.get(url)
     soup = BeautifulSoup(get_national_rail.content, "html.parser")
 

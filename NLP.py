@@ -24,40 +24,17 @@ station_names = [i['stationName'].lower() for i in stations]
 f = open('KB.json')
 intents = json.load(f)
 
-def check_intent(user_sentence):
-
+def clean_input(user_input):
     '''
-        A function to take a user sentence and infer the intention of the user using info in KB.json
+    Function to lower and remove punctuation from a string
     '''
 
-    #all_sents = [sent for intention_type in intents for sent in intents[intention_type]['patterns']]
+    punctuation = [',', '.', '?', '!']
+    for p in punctuation:
+        user_input = user_input.replace(p, "")
+    user_input = user_input.lower()
 
-    max_similarity = -1
-    most_similar_sentence = ""
-    intent = ""
-    user_sentence = lemmatizer.lemmatize(user_sentence)
-    doc1 = nlp(user_sentence)
-    for intention_type in intents:
-        for kb_sent in intents[intention_type]['patterns']:
-            kb_sent = re.sub(r'\#\w+', '', kb_sent)
-            kb_sent = lemmatizer.lemmatize(kb_sent)
-            #clean_sent = re.sub(r'\#\w+', '', kb_sent)
-            doc2 = nlp(kb_sent)
-            similarity = doc1.similarity(doc2)
-            if similarity>max_similarity:
-                max_similarity = similarity
-                most_similar_sentence = kb_sent
-                intent = intention_type
-    #print(most_similar_sentence)
-    #print(max_similarity)
-    #if not sure of intent
-    if(max_similarity<0.65):
-        return None
-
-    return intent
-
-
-
+    return user_input
 
 def find_station_in_sentence(sentence):
     '''
@@ -65,6 +42,8 @@ def find_station_in_sentence(sentence):
         of an n-gram is above a threshold it can be assumed the ngram is a station name
     '''
     #use ngrams to find nearest station
+
+    sentence = clean_input(sentence)
 
     threshold = 90
 
@@ -109,6 +88,50 @@ def get_crs_and_station_name(journey_details, origin_or_destination):
     if crs_code.isdigit():
         crs_code = place
     return crs_code,place
+
+def ask_if_return():
+    '''
+    This function checks whether the user wanted a return journey or not, if yes returns true, if no returns false
+    '''
+    #ask the question and get user input
+    user_input = clean_input(input("Is this a return journey?\n"))
+
+    yes_synonyms = ['yes', 'y']
+    no_synonyms = ['no', 'n']
+
+    while True:
+        words = user_input.split()
+        for y in yes_synonyms:
+            if y in words:
+                return True
+        for n in no_synonyms:
+            if n in words:
+                return False
+        user_input = clean_input(input("I'm sorry, I didn't understand. Is this a return journey?\n"))
+
+
+def get_return_details():
+    '''
+    Function to get time and date of return from user
+    '''
+    user_input = clean_input(input("When would you like to return?\n"))
+    time_and_date = infer_time_and_date(user_input)
+
+    #get date
+    while not time_and_date['date']:
+        user_input = clean_input(input("What date did you want to travel?\n"))
+        temp_time_and_date = infer_time_and_date(user_input)
+        if temp_time_and_date['date']:
+            time_and_date['date'] = temp_time_and_date['date']
+    # get time
+    while not time_and_date['time']:
+        user_input = clean_input(input("What time did you want to travel?\n"))
+        temp_time_and_date = infer_time_and_date(user_input)
+        if temp_time_and_date['time']:
+            time_and_date['time'] = temp_time_and_date['time']
+
+    return time_and_date
+
 def get_response(intent):
     '''
         Function that takes an intent and returns a random response for the intent as specified in the KB
@@ -252,28 +275,83 @@ def infer_date(user_input):
 
 def infer_time_and_date(user_input):
     '''
-    Function to call infer time and infer date and combine the return values
+    Function to call infer time and infer date and combine the return values. The code is looped until a time/date
+    is obtained from the user
     '''
-    time = infer_time(user_input)
-    date = infer_date(user_input)
+    while True:
+        time = infer_time(user_input)
+        date = infer_date(user_input)
 
-    if time and date:
-        if len(time)==1 and len(date)==1:
-            return {'date': date[0], 'time': time[0]}
-        return {'date': date, 'time': time}
-    elif date:
-        if(len(date)==1):
-            return {'date': date[0], 'time': None}
-        return {'date': date, 'time': None}
-    elif time:
-        if (len(time) == 1):
-            return {'date': None, 'time': time[0]}
-        return {'date': None, 'time': time}
 
-    return None
+        if time and date:
+            if len(time)==1 and len(date)==1:
+                return {'date': date[0], 'time': time[0]}
+            return {'date': date, 'time': time}
+        elif date:
+            if(len(date)==1):
+                return {'date': date[0], 'time': None}
+            return {'date': date, 'time': None}
+        elif time:
+            if (len(time) == 1):
+                return {'date': None, 'time': time[0]}
+            return {'date': None, 'time': time}
 
+        #if both time and date are none, it can be assumed they were not included
+        user_input = input("What was the time and date of your journey?\n")
 
 ## MAIN FUNCTION ##
+
+def full_details_response(journey_details, intent):
+    '''
+        for use in the process request function. When all details have been obtained, this
+        can be called to generate the final response
+    '''
+    #ask if return
+    return_times = None
+    return_time = None
+    return_date = None
+    if ask_if_return():
+        #get the details of the return
+        return_details = get_return_details()
+
+        #format details if they are present
+        if return_details['date']:
+            return_time = return_details['date'].strftime("%d%m%y")
+        if return_details['time']:
+            return_date = return_details['time'].strftime("%H%M")
+
+
+
+    #intent may have changed since new details have been gathered, so appropriate response is generated
+    response = get_response(intent)
+
+    #replace origin and destination in response
+    if len(journey_details['origins']) == 1:
+        origin_crs_code, origin = get_crs_and_station_name(journey_details,'origins')
+        response = response.replace("#origin", origin)
+    if len(journey_details['destinations']) == 1:
+        destination_crs_code, destination = get_crs_and_station_name(journey_details,'destinations')
+        response = response.replace("#destination", destination)
+
+    #date and time info
+    date = "today"
+    time = datetime.now().strftime("%H%M")
+
+    if 'departureDate' in journey_details:
+        if journey_details['departureDate']:
+            date = journey_details['departureDate'].strftime("%d%m%y")
+    if 'departureTime' in journey_details:
+        if journey_details['departureTime']:
+            time = journey_details['departureTime'].strftime("%H%M")
+
+    #get the train details using web scraping
+    scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,date,time, return_date, return_time)
+    #append new details to response
+    response = response.replace("#leave_time", scraper_info['departure'])
+    response = response.replace("#price", scraper_info['price'])
+    response += "\n" + scraper_info['url']
+
+    return response
 
 def process_request(user_input,intent):
     '''
@@ -283,7 +361,7 @@ def process_request(user_input,intent):
         return generate_response(intent)
     elif(intent=='requests_no_time_single'):
         journey_details = find_station_in_sentence(user_input)
-        response = full_details_response(journey_details)
+        response = full_details_response(journey_details, intent)
         return response
 
     elif(intent=='requests_no_time_no_origin_single'):
@@ -306,61 +384,41 @@ def process_request(user_input,intent):
         journey_details['destinations'] = journey_details_destination['destinations']
         journey_details['departureDate'] = datetime_obj['date']
         journey_details['departureTime'] = datetime_obj['time']
-        print(journey_details)
         #call full_details function and get ticket info response
-        return full_details_response(journey_details)
+        return full_details_response(journey_details,'requests_with_time_with_location_single')
+
+    elif intent == 'requests_with_time_with_location_single':
+
+        #get journey information
+        journey_details = find_station_in_sentence(user_input)
+
+        # get journey time and/or date
+        datetime_obj = infer_time_and_date(user_input)
+
+        #set time details
+        journey_details['departureDate'] = datetime_obj['date']
+        journey_details['departureTime'] = datetime_obj['time']
+
+        # switching the intent, if this function has been called a certain criteria has been met and therefore the intent switch is needed
+        return full_details_response(journey_details, intent)
 
 
 
     return "no response implemented for: "+intent
-def full_details_response(journey_details):
-    '''
-        for use in the process request function. When all details have been obtained, this
-        can be called to generate the final response
-    '''
-    response = "the cheapest next available journey from #origin to #destination is at #leave_time and costs #price purchase can be made here: "
-
-    #replace origin and destination in response
-    if len(journey_details['origins']) == 1:
-        origin_crs_code, origin = get_crs_and_station_name(journey_details,'origins')
-        response = response.replace("#origin", origin)
-    if len(journey_details['destinations']) == 1:
-        destination_crs_code, destination = get_crs_and_station_name(journey_details,'destinations')
-        response = response.replace("#destination", destination)
-
-    #date and time info
-    date = "today"
-    time = datetime.now().strftime("%H%M")
-
-    if journey_details['departureDate']:
-        date = journey_details['departureDate'].strftime("%d%m%y")
-    if journey_details['departureTime']:
-        time = journey_details['departureTime'].strftime("%H%M")
-
-    #get the train details using web scraping
-    scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,date,time)
-    #append new details to response
-    response = response.replace("#leave_time", scraper_info['departure'])
-    response = response.replace("#price", scraper_info['price'])
-    response += "\n" + scraper_info['url']
-
-    return response
 def generate_response(user_input):
     '''
         Function that takes user_input and prints what it determines to be a suitable response based on the
         input intent
     '''
+    user_input = clean_input(user_input)
 
-    intent = predict_intent(user_input)#check_intent(user_input)
+    #inferring intent using the NN
+    intent = predict_intent(user_input) #check_intent(user_input)
 
     if(not intent):
         return "I'm sorry, I don't understand."
     else:
-        if(intent=="goodbye"):
-            # if the intent is to end the conversation, the loop is exited using break
-            response = str(get_response(intent))
-            return response
-        elif(intent=="greeting"):
+        if(intent=="goodbye" or intent=="greeting" or intent=="thanks" or intent=="requests"):
             response = str(get_response(intent))
             return response
         else:

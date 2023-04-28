@@ -230,7 +230,7 @@
             "Train ticket required for #destination."
         ],
         "responses": [
-            "when and where will you be departing from?"
+            "When and where will you be departing from?"
         ]
     },
     "requests_with_time_with_location_single": {

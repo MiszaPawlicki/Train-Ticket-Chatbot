@@ -89,12 +89,12 @@ def cheapest_ticket(origin, destination, date, departure_time, return_date, retu
 
     if return_time and return_date:
 
-        url += '/[TIME]/[DATE]/dep'
+        url += '/[DATE]/[TIME]/dep'
         url = url.replace('[DATE]', return_date)
         url = url.replace('[TIME]', return_time)
 
 
-
+    print(url)
     get_national_rail = requests.get(url)
     soup = BeautifulSoup(get_national_rail.content, "html.parser")
 

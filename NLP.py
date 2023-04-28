@@ -356,7 +356,7 @@ def check_questions(user_input, intent):
                     active_question['return-date'] = False
 
                 #if questions have been answered skip further questions
-                if journey['return-date'] or journey['return-time']:
+                if not journey['return-date'] or not journey['return-time']:
                     # return appropriate response
                     if not journey['time'] and not journey['return-date']:
                         return "What time and date are you returning?"
@@ -365,7 +365,7 @@ def check_questions(user_input, intent):
                     elif not journey['return-time']:
                         return "What time are you returning?"
                 else:
-                    journey['return'] = False
+                    active_question['return'] = False
 
             else:
                 return "When will you be returning?"
@@ -375,7 +375,7 @@ def check_questions(user_input, intent):
 
     #if only active is true, get url
     if active_question['active'] and all(value == False for key, value in active_question.items() if key != 'active'):
-
+        print("trigger")
         journey_details = {'origins': journey['origin'],
                            'destinations': journey['destination'],
                            'departureDate': journey['date'],

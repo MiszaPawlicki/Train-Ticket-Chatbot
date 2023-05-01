@@ -107,6 +107,7 @@
     },
     "requests_no_time_single": {
         "patterns": [
+            "can i get a ticket from #origin to #destination",
             "i would like to travel between #origin and #destination",
             "are there journeys between #origin and #destination?",
             "i need to go from #origin to #destination",
@@ -156,7 +157,7 @@
             "Is it possible to book a train ticket to #destination from #origin?"
         ],
         "responses": [
-            "the cheapest next available journey from #origin to #destination is at #leave_time and costs #price purchase can be made here: "
+            "When will you be traveling?"
         ]
     },
     "requests_no_time_no_origin_single": {
@@ -300,7 +301,7 @@
             "im looking to purchase the #leave_time ticket for the train from #origin to #destination"
         ],
         "responses": [
-            "the cheapest ticket from #origin to #destination departing at #leave_time is #price and can be purchased here: "
+            "Is this a return journey?"
         ]
     },
     "requests_with_time_with_locations_return_same_day": {
@@ -334,7 +335,7 @@
             "what ticket options are there for a trip from #origin to #destination with a departure at #leave_time and a return at #return_time"
         ],
         "responses": [
-            "the cheapest return ticket from #origin to #destination at #leave_time returning at #return_time is £#price and can be purchased here "
+            "the cheapest return ticket from #origin to #destination at #leave_time returning at #return_time is #price and can be purchased here "
         ]
     },
     "requests_with_time_with_locations_return_different_day": {

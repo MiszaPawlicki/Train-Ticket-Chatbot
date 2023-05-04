@@ -398,7 +398,6 @@ def full_details_response(journey_details):
         can be called to generate the final response
     '''
 
-
     #intent may have changed since new details have been gathered, so appropriate response is generated
     response = "the cheapest available journey from #origin to #destination is at #leave_time and costs #price purchase can be made here: "
 
@@ -437,6 +436,10 @@ def full_details_response(journey_details):
     response = response.replace("#leave_time", scraper_info['departure'])
     response = response.replace("#price", scraper_info['price'])
     response += "\n" + scraper_info['url']
+
+    #reset journey details for any further questions
+    for key in journey:
+        journey[key] = None;
 
     return response
 

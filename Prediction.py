@@ -1,6 +1,8 @@
 import csv
 import datetime
 import holidays
+import os
+import glob
 
 import pandas as pd
 
@@ -8,7 +10,9 @@ import pandas as pd
  # ensure that all the train data is in a folder ready before runnning this file!!
 def read_data():
 
-
+    #for path, subdirectory, files in os.walk("Train data"):
+    #    for file_loc in glob.glob(path+"/*.csv"):
+    #        file = csv.reader(open(file_loc),delimiter = ',')
     file = csv.reader(open("Train data/2022/WATRLMN_WEYMTH_OD_a51_2022_1_1.csv"),delimiter = ',') #start of by reading in one file
     list_file = list(file)
     previous_rid = None
@@ -17,8 +21,18 @@ def read_data():
     previous_expected_departure_row = ""
     journey_first_stop_time = ""
     journey_second_stop_time = ""
+    on_peak = None
+    trains_df = pd.DataFrame(columns = ['first station dev','day of week','day of month','weekday','on peak','hour','associated journey','associated journey dev from dep',
+                                        'associcated journey first stop', 'associated journey second stop'])
 
     for row in list_file[1:]:  # read all the lines in the file - apart from the first line (column names)
+        if row[0]!= previous_rid and previous_rid != None:  # if this is a different train, and not the first piece of data in the file
+            trains_df = pd.concat([trains_df,pd.DataFrame({'first station dev':first_station_deviation,'day of week':day_of_week,
+                                          'day of month':day_of_month,'weekday':weekday,'on peak':on_peak,'hour':hour,
+                                          'associated journey':associated_journey,'associated journey dev from dep':associated_journey_dev_from_dep,
+                                        'associcated journey first stop':associated_journey_first_stop,
+                                          'associated journey second stop':associated_journey_second_stop},index = [0])])
+
 
         destination = find_destination(list_file, row[0])
         print(destination)
@@ -39,7 +53,6 @@ def read_data():
         else:
             weekday = False
         print(day_of_week)
-        on_peak = check_on_peak(date, time)
         print("time ->",time)
 
         if row[3] != row[18]:
@@ -59,11 +72,16 @@ def read_data():
 
 
         elif previous_rid != row[0]:
+            if time == "":
+                continue  # do not add the value to the dataframe
+            on_peak = check_on_peak(date, time)
             #TODO add the current values to the data set - this will mean when the nexr train information can
             # start to be read the previous data can be added to the db/df
             associated_journey_first_stop = journey_first_stop_time
             associated_journey_second_stop = journey_second_stop_time
-            hour = datetime.datetime.strptime(time, '%H:%M').time()
+            journey_first_stop_time = ""
+            journey_second_stop_time = ""
+            hour = datetime.datetime.strptime(time, '%H:%M').time().hour
             if previous_expected_departure_row == "":  # if there is no previous stop
                 associated_journey = ""
                 associated_journey_dev_from_dep = ""
@@ -76,41 +94,23 @@ def read_data():
                     associated_journey_dev_from_dep = associated_journey_dev_from_dep.total_seconds()/60 # convert it into minutes
                     associated_journey = previous_expected_departure_row[3]
                     print(associated_journey_dev_from_dep)
-            print(first_station_deviation,"day:",day_of_month,day_of_week,weekday,on_peak,hour,"associated journey:",associated_journey,
-                  "associated_journey_dev_from_dep:",associated_journey_dev_from_dep,"associated_journey_first_stop:",
-                  associated_journey_first_stop,"associated_journey_second_stop:",associated_journey_second_stop)
             first_station_deviation = None  # make it null again after adding the row to the df/db
 
             previous_expected_departure_row = row
 
-
-
-
-            # find these values:
-                #first station deviation from departure time - done
-                # day of the week   - done
-                # day of the month  - done
-                # Weekday/weekend  - done
-                # on or off peak - done
-                # hour of the day - done
-                # associated journey - Look at data and see when the journey left before
-                    # if the previous journey is on the same day:
-                        #Find the time difference between the expected departure of the
-                        # two where the expected depature is on the station  - this can be the associated journey
-                # associated journey deviation from departure
-                # associated journey first stop
-                # associated journey second stop
-
-
-
-
-            #[row[1],row[]]
-            #train_array.append()
-
-
         previous_rid = row[0]
 
+    #after the for loop has broken, add the final values to the table
 
+    trains_df = pd.concat(
+        [trains_df, pd.DataFrame({'first station dev': first_station_deviation, 'day of week': day_of_week,
+                                  'day of month': day_of_month, 'weekday': weekday, 'on peak': on_peak, 'hour': hour,
+                                  'associated journey': associated_journey,
+                                  'associated journey dev from dep': associated_journey_dev_from_dep,
+                                  'associcated journey first stop': associated_journey_first_stop,
+                                  'associated journey second stop': associated_journey_second_stop}, index=[0])])
+
+    print("money shot")
 
 def check_on_peak(date,time):
     """
@@ -143,13 +143,10 @@ def find_destination(file, rid_no):
 
 
 
-
-
-
-
 def main():
     #print(check_on_peak(datetime.datetime(2022,1,5),"10:00"))
     read_data()
+
 
 
 if __name__ == "__main__":

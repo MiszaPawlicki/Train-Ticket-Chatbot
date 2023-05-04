@@ -8,6 +8,8 @@ from nltk.util import ngrams
 import re
 from datetime import datetime
 import datetime as dtime
+
+
 import scraper
 
 nlp = spacy.load('en_core_web_sm')
@@ -24,6 +26,13 @@ station_names = [i['stationName'].lower() for i in stations]
 f = open('KB.json')
 intents = json.load(f)
 
+
+#active questions
+
+active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False, 'return': False, 'active': False}
+
+#journey details
+journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None, 'return-date': None, 'return': None}
 def clean_input(user_input):
     '''
     Function to lower and remove punctuation from a string
@@ -89,48 +98,9 @@ def get_crs_and_station_name(journey_details, origin_or_destination):
         crs_code = place
     return crs_code,place
 
-def ask_if_return():
-    '''
-    This function checks whether the user wanted a return journey or not, if yes returns true, if no returns false
-    '''
-    #ask the question and get user input
-    user_input = clean_input(input("Is this a return journey?\n"))
-
-    yes_synonyms = ['yes', 'y']
-    no_synonyms = ['no', 'n']
-
-    while True:
-        words = user_input.split()
-        for y in yes_synonyms:
-            if y in words:
-                return True
-        for n in no_synonyms:
-            if n in words:
-                return False
-        user_input = clean_input(input("I'm sorry, I didn't understand. Is this a return journey?\n"))
 
 
-def get_return_details():
-    '''
-    Function to get time and date of return from user
-    '''
-    user_input = clean_input(input("When would you like to return?\n"))
-    time_and_date = infer_time_and_date(user_input)
 
-    #get date
-    while not time_and_date['date']:
-        user_input = clean_input(input("What date did you want to travel?\n"))
-        temp_time_and_date = infer_time_and_date(user_input)
-        if temp_time_and_date['date']:
-            time_and_date['date'] = temp_time_and_date['date']
-    # get time
-    while not time_and_date['time']:
-        user_input = clean_input(input("What time did you want to travel?\n"))
-        temp_time_and_date = infer_time_and_date(user_input)
-        if temp_time_and_date['time']:
-            time_and_date['time'] = temp_time_and_date['time']
-
-    return time_and_date
 
 def get_response(intent):
     '''
@@ -275,55 +245,162 @@ def infer_date(user_input):
 
 def infer_time_and_date(user_input):
     '''
-    Function to call infer time and infer date and combine the return values. The code is looped until a time/date
-    is obtained from the user
+    Function to call infer time and infer date and combine the return values.
     '''
-    while True:
-        time = infer_time(user_input)
-        date = infer_date(user_input)
+
+    time = infer_time(user_input)
+    date = infer_date(user_input)
 
 
-        if time and date:
-            if len(time)==1 and len(date)==1:
-                return {'date': date[0], 'time': time[0]}
-            return {'date': date, 'time': time}
-        elif date:
-            if(len(date)==1):
-                return {'date': date[0], 'time': None}
-            return {'date': date, 'time': None}
-        elif time:
-            if (len(time) == 1):
-                return {'date': None, 'time': time[0]}
-            return {'date': None, 'time': time}
+    if time and date:
+        if len(time)==1 and len(date)==1:
+            return {'date': date[0], 'time': time[0]}
+        return {'date': date, 'time': time}
+    elif date:
+        if(len(date)==1):
+            return {'date': date[0], 'time': None}
+        return {'date': date, 'time': None}
+    elif time:
+        if (len(time) == 1):
+            return {'date': None, 'time': time[0]}
+        return {'date': None, 'time': time}
 
-        #if both time and date are none, it can be assumed they were not included
-        user_input = input("What was the time and date of your journey?\n")
+    return None
+
+
+def check_questions(user_input, intent):
+    '''
+    Function that checks if any questions are active, returns appriproate response. If no questions are active, returns
+    None
+    '''
+    #origin station
+    if(active_question['origin']):
+        #check if info in userinput
+        journey_details = find_station_in_sentence(user_input)
+
+        if journey_details['origins']:
+            active_question['origin'] = False
+            journey['origin'] = journey_details['origins']
+            print(journey)
+        elif journey_details['unspecified']:
+            active_question['origin'] = False
+            journey['origin'] = journey_details['unspecified']
+
+        #if not return the question
+        else:
+            return "When and where will you be departing from?"
+
+    #time
+    if (active_question['time'] or active_question['date']):
+        # check if info in userinput
+        time_details = infer_time_and_date(user_input)
+        print(time_details)
+
+        if(time_details):
+            #check if time obtained
+            if(time_details['time'] and not journey['time']):
+                journey['time'] = time_details['time']
+                active_question['time'] = False
+
+            #check if date obtained
+            if(time_details['date'] and not journey['date']):
+                journey['date'] = time_details['date']
+                active_question['date'] = False
+
+            #return appropriate response
+            if not journey['time'] and not journey['date']:
+                return "What time and date are you traveling?"
+            elif not journey['date']:
+                return "What date are you traveling?"
+            elif not journey['time']:
+                return "What time are you traveling?"
+
+
+        else:
+            return "When will you be traveling?"
+
+    # returns
+
+    if active_question['return'] and not (active_question['time'] or active_question['date']):
+        #ask if return
+        yes_synonyms = ['yes', 'y']
+        no_synonyms = ['no', 'n']
+
+        words = user_input.split()
+        for y in yes_synonyms:
+            if y in words:
+                active_question['return-time'] = True
+                active_question['return-date'] = True
+        for n in no_synonyms:
+            if n in words:
+                active_question['return'] = False
+
+        #if unknown ask if return
+        if active_question['return'] and not (active_question['return-time'] and active_question['return-date']):
+            return "Is this a return journey?"
+
+        #if return gather details
+        if active_question['return'] and (active_question['return-time'] or active_question['return-date']):
+            time_details = infer_time_and_date(user_input)
+
+            #if time info in user input
+            if (time_details):
+                # check if time obtained
+                if (time_details['time'] and not journey['return-time']):
+                    journey['return-time'] = time_details['time']
+                    active_question['return-time'] = False
+
+                # check if date obtained
+                if (time_details['date'] and not journey['return-date']):
+                    journey['return-date'] = time_details['date']
+                    active_question['return-date'] = False
+
+                #if questions have been answered skip further questions
+                if not journey['return-date'] or not journey['return-time']:
+                    # return appropriate response
+                    if not journey['time'] and not journey['return-date']:
+                        return "What time and date are you returning?"
+                    elif not journey['return-date']:
+                        return "What date are you returning?"
+                    elif not journey['return-time']:
+                        return "What time are you returning?"
+                else:
+                    active_question['return'] = False
+
+            else:
+                return "When will you be returning?"
+
+
+
+
+    #if only active is true, get url
+    if active_question['active'] and all(value == False for key, value in active_question.items() if key != 'active'):
+        print("trigger")
+        journey_details = {'origins': journey['origin'],
+                           'destinations': journey['destination'],
+                           'departureDate': journey['date'],
+                           'departureTime': journey['time'],
+                           'returnDate': journey['return-date'],
+                           'returnTime': journey['return-time']
+                           }
+        active_question['active'] = False
+        
+        return full_details_response(journey_details)
+
+    print(journey)
+    return None
 
 ## MAIN FUNCTION ##
 
-def full_details_response(journey_details, intent):
+def full_details_response(journey_details):
     '''
         for use in the process request function. When all details have been obtained, this
         can be called to generate the final response
     '''
-    #ask if return
-    return_times = None
-    return_time = None
-    return_date = None
-    if ask_if_return():
-        #get the details of the return
-        return_details = get_return_details()
-
-        #format details if they are present
-        if return_details['date']:
-            return_time = return_details['date'].strftime("%d%m%y")
-        if return_details['time']:
-            return_date = return_details['time'].strftime("%H%M")
-
 
 
     #intent may have changed since new details have been gathered, so appropriate response is generated
-    response = get_response(intent)
+    response = "the cheapest available journey from #origin to #destination is at #leave_time and costs #price purchase can be made here: "
 
     #replace origin and destination in response
     if len(journey_details['origins']) == 1:
@@ -344,6 +421,16 @@ def full_details_response(journey_details, intent):
         if journey_details['departureTime']:
             time = journey_details['departureTime'].strftime("%H%M")
 
+
+    return_date = None
+    return_time = None
+
+    if 'returnDate' in journey_details:
+        if journey_details['returnDate']:
+            return_date = journey_details['returnDate'].strftime("%d%m%y")
+    if 'returnTime' in journey_details:
+        if journey_details['returnTime']:
+            return_time = journey_details['returnTime'].strftime("%H%M")
     #get the train details using web scraping
     scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,date,time, return_date, return_time)
     #append new details to response
@@ -357,51 +444,134 @@ def process_request(user_input,intent):
     '''
         Function to take a user_input and determine what details are in the sentence
     '''
+    print(intent)
     if(intent=='requests'):
         return generate_response(intent)
     elif(intent=='requests_no_time_single'):
         journey_details = find_station_in_sentence(user_input)
-        response = full_details_response(journey_details, intent)
-        return response
+        journey['destination'] = journey_details['destinations']
+        journey['origin'] = journey_details['origins']
+
+        active_question['time'] = True
+        active_question['date'] = True
+        active_question['return'] = True
+        active_question['active'] = True
+
+        return get_response(intent)
 
     elif(intent=='requests_no_time_no_origin_single'):
 
         #find destination station
+
         journey_details_destination = find_station_in_sentence(user_input)
+        journey['destination'] = journey_details_destination['destinations']
 
-        #ask for origin station
-        user_input = input(get_response(intent) + '\n')
+        #set active questions
 
-        #get journey time and/or date
-        datetime_obj = infer_time_and_date(user_input)
+        active_question['origin'] = True
+        active_question['time'] = True
+        active_question['date'] = True
+        active_question['return'] = True
+        active_question['active'] = True
 
-        #append destination and origin
-        journey_details_origin = find_station_in_sentence(user_input)
-
-        #for now assume no time specified
-        journey_details = {}
-        journey_details['origins'] = journey_details_origin['unspecified']+journey_details_origin['origins']
-        journey_details['destinations'] = journey_details_destination['destinations']
-        journey_details['departureDate'] = datetime_obj['date']
-        journey_details['departureTime'] = datetime_obj['time']
-        #call full_details function and get ticket info response
-        return full_details_response(journey_details,'requests_with_time_with_location_single')
+        return get_response(intent)
 
     elif intent == 'requests_with_time_with_location_single':
 
         #get journey information
         journey_details = find_station_in_sentence(user_input)
+        journey['origin'] = journey_details['origins']
+        journey['destination'] = journey_details['destinations']
 
         # get journey time and/or date
         datetime_obj = infer_time_and_date(user_input)
 
-        #set time details
-        journey_details['departureDate'] = datetime_obj['date']
-        journey_details['departureTime'] = datetime_obj['time']
+        #set time details, if missing set active question
+        if datetime_obj['date']:
+            journey['date'] = datetime_obj['date']
+        else:
+            active_question['date'] = True
 
-        # switching the intent, if this function has been called a certain criteria has been met and therefore the intent switch is needed
-        return full_details_response(journey_details, intent)
+        if datetime_obj['time']:
+            journey['time'] = datetime_obj['time']
+        else:
+            active_question['time'] = True
 
+
+        #set questions
+        active_question['return'] = True
+        active_question['active'] = True
+
+        # return different response if info is missing, else return general response
+        if (not datetime_obj['date'] and not datetime_obj['time']):
+            return "What time and date are you traveling?"
+        elif not datetime_obj['date']:
+            return "What date are you traveling"
+        elif not datetime_obj['time']:
+            return "What time are you traveling?"
+        else:
+            return get_response(intent)
+
+    elif intent == 'requests_with_time_with_locations_return_same_day':
+        #location info
+        journey_details = find_station_in_sentence(user_input)
+        journey['origin'] = journey_details['origins']
+        journey['destination'] = journey_details['destinations']
+
+        #get time info
+        datetime_obj = infer_time_and_date(user_input)
+
+        # split time info
+        if datetime_obj['time']:
+            journey['time'] = datetime_obj['time'][0]
+            journey['return-time'] = datetime_obj['time'][1]
+
+        #if day info none, set to today unless time in the past
+        if not datetime_obj['date']:
+            today = datetime.today().date()
+            journey['date'] = today
+            journey['return-date'] = today
+
+        #return link
+        journey_details = {'origins': journey['origin'],
+                           'destinations': journey['destination'],
+                           'departureDate': journey['date'],
+                           'departureTime': journey['time'],
+                           'returnDate': journey['return-date'],
+                           'returnTime': journey['return-time']
+                           }
+        return full_details_response(journey_details)
+
+    elif intent == 'requests_with_time_with_locations_return_different_day':
+        # location info
+        journey_details = find_station_in_sentence(user_input)
+        journey['origin'] = journey_details['origins']
+        journey['destination'] = journey_details['destinations']
+
+        # get time info
+        datetime_obj = infer_time_and_date(user_input)
+
+        # split time info
+        if datetime_obj['time']:
+            journey['time'] = datetime_obj['time'][0]
+            journey['return-time'] = datetime_obj['time'][1]
+
+        # if day info none, set to today unless time in the past
+
+        today = datetime.today().date()
+        journey['date'] = today
+        journey['return-date'] = datetime_obj['date'][0]
+
+        # return link
+        journey_details = {'origins': journey['origin'],
+                           'destinations': journey['destination'],
+                           'departureDate': journey['date'],
+                           'departureTime': journey['time'],
+                           'returnDate': journey['return-date'],
+                           'returnTime': journey['return-time']
+                           }
+        print(journey_details)
+        return full_details_response(journey_details)
 
 
     return "no response implemented for: "+intent
@@ -412,9 +582,16 @@ def generate_response(user_input):
     '''
     user_input = clean_input(user_input)
 
-    #inferring intent using the NN
-    intent = predict_intent(user_input) #check_intent(user_input)
+    intent = None
 
+    #check if any questions are being asked
+    questions = check_questions(user_input, intent)
+    # inferring intent using the NN
+    intent = predict_intent(user_input)  # check_intent(user_input)
+    if(questions):
+        return questions
+
+    #else check intent
     if(not intent):
         return "I'm sorry, I don't understand."
     else:
@@ -451,11 +628,12 @@ def predict_intent(user_input):
     results.sort(key=lambda x: x[1], reverse=True)
     return_list = []
     intent = None
-    probability = 0.75
+    probability = 0.85
     for r in results:
         return_list.append({'intent': classes[r[0]], 'probability': str(r[1])})
         #print(classes[r[0]])
         if r[1] > probability:
+            print(r[1])
             probability = r[1]
             intent = classes[r[0]]
     #print(intent)
@@ -463,6 +641,4 @@ def predict_intent(user_input):
     return intent
 ######################
 
-while True:
-    user_input = input("enter a command:\n")
-    print(generate_response(user_input))
+

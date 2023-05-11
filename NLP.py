@@ -29,7 +29,7 @@ intents = json.load(f)
 
 #active questions
 
-active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False, 'return': False, 'active': False}
+active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False, 'return': False, 'active': False, 'multiple-origins': False, 'multiple-destinations': False}
 
 #journey details
 journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None, 'return-date': None, 'return': None}
@@ -71,14 +71,22 @@ def find_station_in_sentence(sentence):
                 preceding_word = nltk.word_tokenize(sentence)[station_index-1]
 
                 if(preceding_word=="to"):
-                    destination_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    destination_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
                 elif(preceding_word=="from"):
-                    origin_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    origin_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
                 else:
-                    unspecified_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    unspecified_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
 
                 #print(f"Match found: {station} - {similarity_score}")
 
+
+    #check if multiple stations
+    if origin_list:
+        if origin_list[0]['crsCode'].isnumeric():
+            active_question['multiple-origins'] = True
+    if destination_list:
+        if destination_list[0]['crsCode'].isnumeric():
+            active_question['multiple-destinations'] = True
 
     return_dict = {}
     return_dict['destinations'] = destination_list

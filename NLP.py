@@ -29,7 +29,7 @@ intents = json.load(f)
 
 #active questions
 
-active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False, 'return': False, 'active': False}
+active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False, 'return': False, 'active': False, 'multiple-origins': False, 'multiple-destinations': False}
 
 #journey details
 journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None, 'return-date': None, 'return': None}
@@ -71,14 +71,26 @@ def find_station_in_sentence(sentence):
                 preceding_word = nltk.word_tokenize(sentence)[station_index-1]
 
                 if(preceding_word=="to"):
-                    destination_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    destination_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
                 elif(preceding_word=="from"):
-                    origin_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    origin_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
                 else:
-                    unspecified_list.extend([s for s in stations if s['stationName'].lower()==station.lower()])
+                    unspecified_list.extend([s for s in stations if s['stationName'].lower() == station.lower()])
 
                 #print(f"Match found: {station} - {similarity_score}")
 
+
+    #check if multiple stations
+    if origin_list:
+        if origin_list[0]['crsCode'].isnumeric():
+            active_question['multiple-origins'] = True
+        else:
+            active_question['multiple-origins'] = False
+    if destination_list:
+        if destination_list[0]['crsCode'].isnumeric():
+            active_question['multiple-destinations'] = True
+        else:
+            active_question['multiple-destinations'] = False
 
     return_dict = {}
     return_dict['destinations'] = destination_list
@@ -267,6 +279,20 @@ def infer_time_and_date(user_input):
 
     return None
 
+def yes_or_no(user_input):
+    '''
+        Function to ask yes or no
+    '''
+    yes_synonyms = ['yes', 'y', 'yep', 'yeah']
+    no_synonyms = ['no', 'n', 'not', 'nope', 'nah', 'isnt']
+
+    words = user_input.split()
+    for y in yes_synonyms:
+        if y in words:
+            return True
+    for n in no_synonyms:
+        if n in words:
+            return False
 
 def check_questions(user_input, intent):
     '''
@@ -319,12 +345,14 @@ def check_questions(user_input, intent):
         else:
             return "When will you be traveling?"
 
+
+
     # returns
 
     if active_question['return'] and not (active_question['time'] or active_question['date']):
         #ask if return
-        yes_synonyms = ['yes', 'y']
-        no_synonyms = ['no', 'n']
+        yes_synonyms = ['yes', 'y', 'yep', 'yeah']
+        no_synonyms = ['no', 'n', 'not', 'nope', 'nah', 'isnt']
 
         words = user_input.split()
         for y in yes_synonyms:
@@ -334,6 +362,7 @@ def check_questions(user_input, intent):
         for n in no_synonyms:
             if n in words:
                 active_question['return'] = False
+
 
         #if unknown ask if return
         if active_question['return'] and not (active_question['return-time'] and active_question['return-date']):
@@ -369,13 +398,74 @@ def check_questions(user_input, intent):
 
             else:
                 return "When will you be returning?"
+        if active_question['multiple-origins']:
+            return "Would you like to travel from a specific station in " + journey['origin'][0]['stationName'] + "?"
+        elif active_question['multiple-destinations']:
+            return "Would you like to travel to a specific station in " + journey['destination'][0]['stationName'] + "?"
+
+    # multiple stations
+    if active_question['multiple-origins']:
+        # ask if multiple origin
+        multiple_stations = yes_or_no(user_input)
+        station = find_station_in_sentence(user_input)
+        if multiple_stations == False:
+            active_question['multiple-origins'] = False
+        else:
+            if station['origins']:
+                for s in station['origins']:
+                    if s is not journey['origin'][0]:
+                        journey['origin'] = [s]
+                        active_question['multiple-origins'] = False
+                        if active_question['multiple-destinations']:
+                            return "Would you like to travel to a specific station in " + journey['destination'][0][
+                    'stationName'] + "?"
+                        break
 
 
+            elif station['unspecified']:
+                for s in station['unspecified']:
+                    if s is not journey['origin'][0]:
+                        journey['origin'] = [s]
+                        active_question['multiple-origins'] = False
+                        if active_question['multiple-destinations']:
+                            return "Would you like to travel to a specific station in " + journey['destination'][0][
+                                'stationName'] + "?"
+                        break
+
+            else:
+                return "Would you like to travel from a specific station in " + journey['origin'][0]['stationName'] + "?"
+
+    # multiple destinations
+    elif active_question['multiple-destinations']:
+        # ask if multiple origin
+        multiple_stations = yes_or_no(user_input)
+        station = find_station_in_sentence(user_input)
+        if multiple_stations == False:
+            active_question['multiple-destinations'] = False
+        else:
+            if station['destinations']:
+                for s in station['destinations']:
+                    if s is not journey['destination'][0]:
+                        journey['destination'] = [s]
+                        active_question['multiple-destinations'] = False
+                        break
+
+
+            elif station['unspecified']:
+                for s in station['unspecified']:
+                    if s is not journey['destination'][0]:
+                        journey['destination'] = [s]
+                        active_question['multiple-destinations'] = False
+                        break
+
+            else:
+                return "Would you like to travel to a specific station in " + journey['destination'][0][
+                    'stationName'] + "?"
 
 
     #if only active is true, get url
     if active_question['active'] and all(value == False for key, value in active_question.items() if key != 'active'):
-        print("trigger")
+
         journey_details = {'origins': journey['origin'],
                            'destinations': journey['destination'],
                            'departureDate': journey['date'],
@@ -397,7 +487,6 @@ def full_details_response(journey_details):
         for use in the process request function. When all details have been obtained, this
         can be called to generate the final response
     '''
-
 
     #intent may have changed since new details have been gathered, so appropriate response is generated
     response = "the cheapest available journey from #origin to #destination is at #leave_time and costs #price purchase can be made here: "
@@ -437,6 +526,10 @@ def full_details_response(journey_details):
     response = response.replace("#leave_time", scraper_info['departure'])
     response = response.replace("#price", scraper_info['price'])
     response += "\n" + scraper_info['url']
+
+    #reset journey details for any further questions
+    for key in journey:
+        journey[key] = None;
 
     return response
 

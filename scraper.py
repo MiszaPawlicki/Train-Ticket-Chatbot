@@ -107,7 +107,7 @@ def cheapest_ticket(origin, destination, date, departure_time, return_date, retu
     actual_arrival_time = ticket_section.find("div", {"class": "arr"}).text.strip()
     link = url#find_ticket_link(url)
 
-    return {'price': cost, 'departure': actual_dep_time, 'arrival': actual_arrival_time, 'url': link}
+    return {'price': cost, 'departure': actual_dep_time, 'arrival': actual_arrival_time, 'url': '<a href=' + link + '>click here!</a>'}
 
 def find_ticket_link(url):
     #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))

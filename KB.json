@@ -359,10 +359,24 @@
             "the cheapest return ticket from #origin to #destination matching those time constraints is £#price and can be purchased here "
         ]
     },
+    "reset": {
+        "patterns": [
+            "I would like to start again",
+            "Reset",
+            "can we start this again",
+            "lets start from the beginning",
+            "forget all of that"
+        ],
+        "responses": [
+            "Okay, everything has been reset.",
+            "Sure, I have reset all details",
+            "The journey details have been reset"
+        ]
+    },
     "delayed_train": {
         "patterns": [
             "my train is late",
-            "i think my trian is delayed",
+            "i think my train is delayed",
             "i think my train is late",
             "my train is not here",
             "my journey has been delayed",

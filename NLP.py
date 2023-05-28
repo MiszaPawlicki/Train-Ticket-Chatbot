@@ -33,6 +33,7 @@ active_question = {'time': False, 'date': False, 'return-time': False, 'return-d
 
 #journey details
 journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None, 'return-date': None, 'return': None}
+
 def clean_input(user_input):
     '''
     Function to lower and remove punctuation from a string
@@ -530,7 +531,7 @@ def full_details_response(journey_details):
     #reset journey details for any further questions
     for key in journey:
         journey[key] = None;
-
+    print(response)
     return response
 
 def process_request(user_input,intent):
@@ -675,7 +676,20 @@ def generate_response(user_input):
     '''
     user_input = clean_input(user_input)
 
-    intent = None
+    intent = predict_intent(user_input)
+    if intent == "reset":
+        global journey
+        global active_question
+
+        # active questions
+        active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False,
+                           'return': False, 'active': False, 'multiple-origins': False, 'multiple-destinations': False}
+        # journey details
+        journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None,
+                   'return-date': None, 'return': None}
+        return get_response(intent)
+    else:
+        intent = None
 
     #check if any questions are being asked
     questions = check_questions(user_input, intent)
@@ -724,7 +738,6 @@ def predict_intent(user_input):
     probability = 0.85
     for r in results:
         return_list.append({'intent': classes[r[0]], 'probability': str(r[1])})
-        #print(classes[r[0]])
         if r[1] > probability:
             print(r[1])
             probability = r[1]

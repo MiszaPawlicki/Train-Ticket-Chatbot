@@ -381,7 +381,10 @@
             "my train is not here",
             "my journey has been delayed",
             "i have had a delay",
-            "when is my train going to get in now"
+            "when is my train going to get in now",
+            "can you help with a delayed train",
+            "i need help with my train",
+            "there is a problem with my current journey"
         ],
         "responses": [
             "Which train are you currently on?",

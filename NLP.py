@@ -111,10 +111,6 @@ def get_crs_and_station_name(journey_details, origin_or_destination):
         crs_code = place
     return crs_code,place
 
-
-
-
-
 def get_response(intent):
     '''
         Function that takes an intent and returns a random response for the intent as specified in the KB

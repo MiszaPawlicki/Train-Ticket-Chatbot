@@ -174,6 +174,7 @@
             "i need to go to #destination",
             "im going to #destination",
             "i would like to book a ticket to #destination",
+            "i would like to book a ticket to #destination please",
             "can you find me a ticket to #destination",
             "can you give me a ticket to #destination",
             "is there trains to #destination",
@@ -365,7 +366,11 @@
             "Reset",
             "can we start this again",
             "lets start from the beginning",
-            "forget all of that"
+            "forget all of that",
+            "let us start over",
+            "can we restart?",
+            "restart",
+            "can we begin again?"
         ],
         "responses": [
             "Okay, everything has been reset.",
@@ -373,7 +378,7 @@
             "The journey details have been reset"
         ]
     },
-    "delayed_train": {
+    "delayed_train_no details": {
         "patterns": [
             "my train is late",
             "i think my train is delayed",
@@ -392,7 +397,61 @@
             "How long is the delay?",
             "Where is your destination?"
         ]
+    },
+    "delayed_train_only_origin": {
+    "patterns": [
+
+        ],
+    "responses": [
+
+        ]
+    },
+    "delayed_train_only_destination": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "delayed_train_only_time": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "delayed_train_destination_wtih_origin": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "delayed_train_destination_wtih_time": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "delayed_train_origin_with_time": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
+    },
+    "delayed_train_all_details": {
+        "patterns": [
+
+        ],
+        "responses": [
+
+        ]
     }
-
-
 }

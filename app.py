@@ -15,6 +15,7 @@ def speak(text):
 def home():
     #Speaks before loading and delays the system, not sure if we should just skip the intro message or not.
     #speak("Hi, I am your personal ticket assistant! How can I help you today?")
+    #testing
     return render_template("index.html")
 
 

@@ -111,10 +111,6 @@ def get_crs_and_station_name(journey_details, origin_or_destination):
         crs_code = place
     return crs_code,place
 
-
-
-
-
 def get_response(intent):
     '''
         Function that takes an intent and returns a random response for the intent as specified in the KB
@@ -521,9 +517,11 @@ def full_details_response(journey_details):
     if 'returnTime' in journey_details:
         if journey_details['returnTime']:
             return_time = journey_details['returnTime'].strftime("%H%M")
-    #get the train details using web scraping
+
+    # get the train details using web scraping
     scraper_info = scraper.cheapest_ticket(origin_crs_code, destination_crs_code,date,time, return_date, return_time)
-    #append new details to response
+
+    # append new details to response
     response = response.replace("#leave_time", scraper_info['departure'])
     response = response.replace("#price", scraper_info['price'])
     response += "\n" + scraper_info['url']

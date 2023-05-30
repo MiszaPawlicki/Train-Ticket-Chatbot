@@ -271,6 +271,12 @@ def predict_using_params(first_station_dev = None, day_of_week = None, day_of_mo
     return predictor.predict(input)[0]
 
 def time_difference(rid, end_location):
+    """
+
+    :param rid: rid number relating to the classification algorithm that results from the
+    :param end_location:
+    :return:
+    """
     arrival_time = ""
     expected_arrival = ""
     for path, subdirectory, files in os.walk("Train data"):
@@ -284,32 +290,51 @@ def time_difference(rid, end_location):
                             arrival_time = row[16]
                         elif row[17]!="":  # The time of passing is retrieved
                             arrival_time = row[17]
+                        elif row[10] != "":  # expected passing time otherwise is retrieved
+                            arrival_time = row[10]
+                        elif row[18] != "":
+                            arrival_time = row[18]
 
 
                         if row[7]!="":  # expected time of arrival is retrieved
                             expected_arrival = row[7]
-                        elif row[10] != "":  # expected passing time otherwise is retrieved
-                            expected_arrival = row[10]
                         elif row[3] != "":
                             expected_arrival = row[3]
+                        elif row[4] != "":
+                            expected_arrival = row[4]
+                        elif row[5] != "":
+                            expected_arrival = row[5]
 
 
-    time_difference = datetime.datetime.strptime(arrival_time, '%H:%M') - datetime.datetime.strptime(expected_arrival, '%H:%M')
+    if arrival_time == "" and expected_arrival == "":
+        arrival_time = "00:00"
+        expected_arrival = "00:00"
+    elif arrival_time == "":
+        arrival_time = expected_arrival
+    elif expected_arrival == "":
+        expected_arrival = arrival_time
+
+    if len(arrival_time)>6:
+        arrival_time = datetime.datetime.strptime(arrival_time, '%H:%M:%S')
+    else:
+        arrival_time = datetime.datetime.strptime(arrival_time, '%H:%M')
+
+    if len(expected_arrival)>6:
+        expected_arrival = datetime.datetime.strptime(expected_arrival, '%H:%M:%S')
+    else:
+        expected_arrival = datetime.datetime.strptime(expected_arrival, '%H:%M')
+
+    time_difference = arrival_time - expected_arrival
     #print(time_difference.seconds,"is the amount of seconds between the two stops")
 
-    print(time_difference.seconds)
+
     return time_difference.seconds
 
 def test_prediction():
     file = sqlite3.connect('prediction data/test.sqlite')
     from_file = pd.read_sql_query(" SELECT * FROM Train_data", file)
     y = []
-    #for index,each_line in from_file.iterrows():
-    #    print(time_difference(each_line['rid'],"SOTON","WEYMTH"))
-    #    print(each_line['rid'])
-    #    y.append(time_difference(each_line['rid'],"SOTON","WEYMTH"))
 
-    #print("done")
     translate_y = []
     for path, subdirectory, files in os.walk("Train data"):
         for file_loc in glob.glob(path+"/*.csv"):
@@ -325,6 +350,8 @@ def test_prediction():
                         first_time = row[17]
                     elif row[10] != "":  # expected passing time otherwise is retrieved
                         first_time = row[10]
+                    else:
+                        first_time = "00:00"
 
                 if row[1] == "WEYMTH":
                     if row[16]!="":  # retrieve the arrival time if there is one
@@ -335,6 +362,8 @@ def test_prediction():
                         second_time = row[17]
                     elif row[10] != "":  # expected passing time otherwise is retrieved
                         second_time = row[10]
+                    else:
+                        second_time = "00:00"
                     if (datetime.datetime.strptime(second_time, '%H:%M') - datetime.datetime.strptime(first_time, '%H:%M')).total_seconds()<0:
                         print(second_time," and ft:",first_time)
                     translate_y.append([row[0], (datetime.datetime.strptime(second_time, '%H:%M') - datetime.datetime.strptime(first_time, '%H:%M')).total_seconds()])
@@ -343,20 +372,54 @@ def test_prediction():
         print(each)
 
 
+def stations_conversion(station_name):
+    file = csv.reader(open("stations.csv"), delimiter=',')
+    list_file = list(file)
+    for line in list_file[1:]:
+        if line[3] == station_name:
+            return line[4]  # convert from one name type to another
 
+def make_prediction(input_details):
+    destination = input_details['destination'][0]
+    end_location = stations_conversion(destination['crsCode'])
 
+    #print(input_details['date'].date())
+    time = datetime.datetime(year=1970,month=1,day=1,hour=input_details['time'].hour,minute=input_details['time'].minute)
+    delay_minutes = (input_details['delay'])
+    time = (time + datetime.timedelta(minutes=delay_minutes))  # find the change of time of arrival
+    day_of_week = input_details['date'].weekday()
+    day_of_month = input_details['date'].day
+    boolean_weekday = input_details['date'].weekday()
+    #print("boolean weekday = ",boolean_weekday)
+    on_peak = check_on_peak(input_details['date'],str(str(time.hour)+":"+str(time.minute)))
+    rid = predict_using_params(day_of_month = day_of_month,day_of_week=day_of_week,boolean_weekday=boolean_weekday,
+                               hour=input_details['time'].hour,on_peak=on_peak)
+    difference = time_difference(rid=rid,end_location=end_location)  # find the time difference between the two locations
+    #print(time.time())
+    #print(difference)
+    #print((time + datetime.timedelta(seconds=difference)).time())
+    return (time+datetime.timedelta(seconds=difference)).time()
 
 def main():
 
     #read_data()  # the files need to be stored prior to runnning the prediction model
 
-    planned_arrival = "13:55"
-    planned_arrival = datetime.datetime.strptime(planned_arrival, "%H:%M")
+    #planned_arrival = "13:55"
+    #planned_arrival = datetime.datetime.strptime(planned_arrival, "%H:%M")
 
-    rid = predict_using_params(day_of_month=12) #input parameters into this function
-    difference = time_difference(rid=rid,end_location="WDON")
-    result = planned_arrival + datetime.timedelta(seconds=difference)
-    print(result.time())
+    input_details = {'destination': [{'stationName': 'Weymouth', 'lat': 50.61515, 'long': -2.455103, 'crsCode': 'WEY'}],
+                    'time': datetime.time(8, 0), 'delay': 10,
+                    'date': datetime.datetime(2023, 5, 30, 20, 24, 34, 924684)}
+    print(make_prediction(input_details))
+
+    #rid = predict_using_params(day_of_month=5, first_station_dev="WATRLMN",boolean_weekday=True,on_peak=True) #input parameters into this function
+    #print(rid)
+    #difference = time_difference(rid=rid,end_location="WDON")
+    #result = planned_arrival + datetime.timedelta(seconds=difference)
+    #print(result.time())
+
+    #test_details.get("destination")
+
 
 
 if __name__ == "__main__":

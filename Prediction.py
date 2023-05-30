@@ -14,7 +14,7 @@ from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 
 
-def read_data_2():
+def read_data():
     trains_df = pd.DataFrame(
         columns=['first station dev', 'day of week', 'day of month', 'weekday', 'on peak', 'hour', 'associated journey',
                  'associated journey dev from dep',
@@ -22,6 +22,7 @@ def read_data_2():
 
     for path, subdirectory, files in os.walk("Train data"):
         for file_loc in glob.glob(path+"/*.csv"):
+            print(file_loc)
             file = csv.reader(open(file_loc),delimiter = ',')
             list_file = list(file)
             rid_no = list_file[1][0]
@@ -29,7 +30,10 @@ def read_data_2():
             first_station_deviation = None
             journey_first_stop_time = ""
             journey_second_stop_time = ""
-            date = datetime.datetime.strptime(list_file[1][0][0:8],'%Y%m%d').date()
+            year = rid_no[0:4]
+            month = rid_no[4:6]
+            day_of_month = rid_no[6:8]
+            date = datetime.datetime.strptime(year + month + day_of_month, '%Y%m%d').date()
             day_of_week = date.weekday()
             weekday = ""
             if list_file[1][18] != "":
@@ -42,12 +46,11 @@ def read_data_2():
             associated_journey = "0"
             associated_journey_dev_from_dep = "0"
             associated_journey_first_stop = "00:00"
-            associated_journey_second_stop ="00:00"
+            associated_journey_second_stop = "00:00"
+            associated_journey_first_stop_value = 0
+            associated_journey_second_stop_value = 0
             predicted_dep = "00:00"
             previous_dep = "00:00"
-            year = rid_no[0:4]
-            month = rid_no[4:6]
-            day_of_month = rid_no[6:8]
             if day_of_week < 5:
                 weekday = True
             else:
@@ -62,8 +65,9 @@ def read_data_2():
                     trains_df = pd.concat([trains_df,pd.DataFrame({'first station dev':first_station_deviation,'day of week':day_of_week,
                                                   'day of month':day_of_month,'weekday':weekday,'on peak':on_peak,'hour':hour,
                                                   'associated journey':associated_journey,'associated journey dev from dep':associated_journey_dev_from_dep,
-                                                'associated journey first stop':associated_journey_first_stop,
-                                                  'associated journey second stop':associated_journey_second_stop,'rid':previous_rid},index = [0])])
+                                                'associated journey first stop':associated_journey_first_stop_value,
+                                                  'associated journey second stop':associated_journey_second_stop_value
+                                                                      ,'rid':previous_rid},index = [0])])
 
                     rid_no = row[0]  # retrieve the unique value that relates to the train instance
                     year = rid_no[0:4]
@@ -106,8 +110,11 @@ def read_data_2():
 
 
                 elif previous_rid != row[0]:
+                    associated_journey_first_stop_value = datetime.datetime.strptime(journey_first_stop_time,'%H:%M').minute - datetime.datetime.strptime(associated_journey_first_stop,'%H:%M').minute
+                    associated_journey_second_stop_value = datetime.datetime.strptime(journey_second_stop_time,'%H:%M').minute - datetime.datetime.strptime(associated_journey_second_stop,'%H:%M').minute
                     associated_journey_first_stop = journey_first_stop_time
                     associated_journey_second_stop = journey_second_stop_time
+
                     journey_first_stop_time = ""
                     journey_second_stop_time = ""
                     first_station_deviation = None  # make it null again after adding the row to the df/db
@@ -116,22 +123,34 @@ def read_data_2():
                         previous_rid = row[0] # does not allow the incomplete data to be stored
                         continue  # do not add the value to the dataframe - Go to next iteration to stop break of loop
                     if previous_expected_departure_row == "":  # if there is no previous stop
-                        associated_journey = ""
-                        associated_journey_dev_from_dep = ""
-                        associated_journey_first_stop = ""
-                        associated_journey_second_stop = ""
+                        associated_journey = "00:00"
+                        associated_journey_dev_from_dep = "00:00"
+                        associated_journey_first_stop = "00:00"
+                        associated_journey_second_stop = "00:00"
                     else:
-                        if date == datetime.datetime.strptime(previous_expected_departure_row[0][0:8],'%Y%m%d').date():  # if the date is the same as the previous departure
-                            if previous_expected_departure_row[18] != "":
-                                previous_expected = previous_expected_departure_row[18]
-                            else:
-                                previous_expected = previous_expected_departure_row[13]
-
-
+                        if date == datetime.datetime.strptime(previous_rid[0:8],'%Y%m%d').date():  # if the date is the same as the previous departure
                             associated_journey_dev_from_dep = datetime.datetime.strptime(previous_dep,'%H:%M')\
                                                           - datetime.datetime.strptime(previous_pred_dep,'%H:%M')
                             associated_journey_dev_from_dep = associated_journey_dev_from_dep.total_seconds()/60 # convert it into minutes
-                            associated_journey = previous_expected_departure_row[3]
+
+
+                            associated_journey =(datetime.datetime.strptime(time,'%H:%M')\
+                                                          - datetime.datetime.strptime(previous_dep,'%H:%M')).total_seconds()/60
+                            if associated_journey<0:
+                                associated_journey = 0  # this is a bug!! - The data is not in chronological order!!
+                                associated_journey_dev_from_dep = 0
+                                associated_journey_first_stop = "00:00"
+                                associated_journey_first_stop_value = 0
+                                associated_journey_second_stop = "00:00"
+                                associated_journey_second_stop_value = 0
+
+                        else:
+                            associated_journey = 0
+                            associated_journey_dev_from_dep = 0
+                            associated_journey_first_stop = "00:00"
+                            associated_journey_first_stop_value = 0
+                            associated_journey_second_stop = "00:00"
+                            associated_journey_second_stop_value = 0
 
                     hour = datetime.datetime.strptime(time, '%H:%M').time().hour
                     on_peak = check_on_peak(date, time)
@@ -147,8 +166,9 @@ def read_data_2():
                                           'day of month': day_of_month, 'weekday': weekday, 'on peak': on_peak, 'hour': hour,
                                           'associated journey': associated_journey,
                                           'associated journey dev from dep': associated_journey_dev_from_dep,
-                                          'associated journey first stop': associated_journey_first_stop,
-                                          'associated journey second stop': associated_journey_second_stop,"rid":previous_rid}, index=[0])])
+                                          'associated journey first stop': associated_journey_first_stop_value,
+                                          'associated journey second stop': associated_journey_second_stop_value,
+                                          "rid":previous_rid}, index=[0])])
 
 
     file = sqlite3.connect('prediction data/test.sqlite')
@@ -185,6 +205,21 @@ def check_on_peak(date,time):
 def predict_using_params(first_station_dev = None, day_of_week = None, day_of_month = None, boolean_weekday = None,
                          on_peak = None, hour = None, associated_journey = None, associated_journey_dev_from_dep = None,
                 associated_journey_first_stop = None,associated_journey_second_stop = None):
+    """
+
+
+    :param first_station_dev:
+    :param day_of_week: As a number  (1-Monday)
+    :param day_of_month: As a number
+    :param boolean_weekday: 1 - weekday, 0-weekend
+    :param on_peak: (run on peak function)
+    :param hour:
+    :param associated_journey:
+    :param associated_journey_dev_from_dep:
+    :param associated_journey_first_stop:
+    :param associated_journey_second_stop:
+    :return:
+    """
     # read in the data from the database
     train_data = pd.DataFrame()
     file = sqlite3.connect('prediction data/test.sqlite')
@@ -223,18 +258,11 @@ def predict_using_params(first_station_dev = None, day_of_week = None, day_of_mo
         train_data['associated journey dev from dep'] = from_file['associated journey dev from dep']
         input['associated journey dev from dep'] = [associated_journey_dev_from_dep]
     if associated_journey_first_stop != None:
-        # TODO needs to be converted into numerical values
         train_data['associated journey first stop'] = from_file['associated journey first stop']
         input['associated journey first stop'] = [associated_journey_first_stop]
     if associated_journey_second_stop != None:
         train_data['associated journey second stop'] = from_file['associated journey second stop']
         input['associated journey second stop'] = [associated_journey_second_stop]
-
-
-    #encoder = OneHotEncoder(sparse_output=False)
-    #encoded = encoder.fit_transform(train_data)
-    #column_names = encoder.get_feature_names_out(input_features=['first station dev'])
-    #encoded = pd.DataFrame(encoded, columns=column_names)
 
     predictor = KNeighborsClassifier(n_neighbors=1)
     y_values = np.array(from_file['rid'].values)
@@ -242,73 +270,94 @@ def predict_using_params(first_station_dev = None, day_of_week = None, day_of_mo
 
     return predictor.predict(input)[0]
 
-def time_difference(rid, start, end):
-    first_time = ""
-    second_time = ""
+def time_difference(rid, end_location):
+    arrival_time = ""
+    expected_arrival = ""
     for path, subdirectory, files in os.walk("Train data"):
         for file_loc in glob.glob(path + "/*.csv"):
             file = csv.reader(open(file_loc), delimiter=',')
             list_file = list(file)
             for row in list_file[1:]:
                 if row[0] == rid:
-                    if row[1] == start:
-
-                        if row[18]!="":  # retrieve the departure time if there is one
-                            first_time = row[18]
-                        if row[13]!="":
-                            first_time = row[13]
-                        elif row[17]!="":  # The time of passing is retrieved
-                            first_time = row[17]
-                        elif row[10] != "":  # expected passing time otherwise is retrieved
-                            first_time = row[10]
-
-                    if row[1] == end:
+                    if row[1] == end_location:
                         if row[16]!="":  # retrieve the arrival time if there is one
-                            second_time = row[16]
-                        elif row[7]!="":  # expected time of arrival is retrieved
-                            second_time = row[7]
+                            arrival_time = row[16]
                         elif row[17]!="":  # The time of passing is retrieved
-                            second_time = row[17]
-                        elif row[10] != "":  # expected passing time otherwise is retrieved
-                            second_time = row[10]
+                            arrival_time = row[17]
 
-    time_difference = datetime.datetime.strptime(second_time, '%H:%M') - datetime.datetime.strptime(first_time, '%H:%M')
+
+                        if row[7]!="":  # expected time of arrival is retrieved
+                            expected_arrival = row[7]
+                        elif row[10] != "":  # expected passing time otherwise is retrieved
+                            expected_arrival = row[10]
+                        elif row[3] != "":
+                            expected_arrival = row[3]
+
+
+    time_difference = datetime.datetime.strptime(arrival_time, '%H:%M') - datetime.datetime.strptime(expected_arrival, '%H:%M')
     #print(time_difference.seconds,"is the amount of seconds between the two stops")
+
+    print(time_difference.seconds)
     return time_difference.seconds
 
+def test_prediction():
+    file = sqlite3.connect('prediction data/test.sqlite')
+    from_file = pd.read_sql_query(" SELECT * FROM Train_data", file)
+    y = []
+    #for index,each_line in from_file.iterrows():
+    #    print(time_difference(each_line['rid'],"SOTON","WEYMTH"))
+    #    print(each_line['rid'])
+    #    y.append(time_difference(each_line['rid'],"SOTON","WEYMTH"))
+
+    #print("done")
+    translate_y = []
+    for path, subdirectory, files in os.walk("Train data"):
+        for file_loc in glob.glob(path+"/*.csv"):
+            file = csv.reader(open(file_loc), delimiter=',')
+            list_file = list(file)
+            for row in list_file[1:]:
+                if row[1] == "SOTON":
+                    if row[18]!="":  # retrieve the departure time if there is one
+                        first_time = row[18]
+                    if row[13]!="":
+                        first_time = row[13]
+                    elif row[17]!="":  # The time of passing is retrieved
+                        first_time = row[17]
+                    elif row[10] != "":  # expected passing time otherwise is retrieved
+                        first_time = row[10]
+
+                if row[1] == "WEYMTH":
+                    if row[16]!="":  # retrieve the arrival time if there is one
+                        second_time = row[16]
+                    elif row[7]!="":  # expected time of arrival is retrieved
+                        second_time = row[7]
+                    elif row[17]!="":  # The time of passing is retrieved
+                        second_time = row[17]
+                    elif row[10] != "":  # expected passing time otherwise is retrieved
+                        second_time = row[10]
+                    if (datetime.datetime.strptime(second_time, '%H:%M') - datetime.datetime.strptime(first_time, '%H:%M')).total_seconds()<0:
+                        print(second_time," and ft:",first_time)
+                    translate_y.append([row[0], (datetime.datetime.strptime(second_time, '%H:%M') - datetime.datetime.strptime(first_time, '%H:%M')).total_seconds()])
+
+    for each in translate_y:
+        print(each)
+
+
+
+
+
 def main():
-    #print(check_on_peak(datetime.datetime(2022,1,5),"10:00"))
-    #start = time.time()
-    #train_data = read_data_2()
 
+    #read_data()  # the files need to be stored prior to runnning the prediction model
 
-    rid = predict_using_params(first_station_dev="WDON")
-    # TODO associated journeys need to be changed to a value that can be compared - maybe the time in difference?
-    difference = time_difference(rid,"WDON","ESHER")
-    planned_arrival = "11:52"
+    planned_arrival = "13:55"
     planned_arrival = datetime.datetime.strptime(planned_arrival, "%H:%M")
 
-    result = planned_arrival + datetime.timedelta(seconds = difference)
+    rid = predict_using_params(day_of_month=12) #input parameters into this function
+    difference = time_difference(rid=rid,end_location="WDON")
+    result = planned_arrival + datetime.timedelta(seconds=difference)
     print(result.time())
 
-
-
-    # find the predicted time of arrival from the user and add the time difference to it.
-
-    # What is the expected time of arrival?
-    # What was the actual time of arrival?
-
-
-
-
-
-    #train_data.to_csv('train_data.csv')
-
-    #end = time.time()
-    #duration = end - start
-    #print(duration)
-    #print("money shot")
-    #prediction("202001028717288", "WDON","ESHER")
 
 if __name__ == "__main__":
     main()

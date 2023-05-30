@@ -363,13 +363,11 @@
     "reset": {
         "patterns": [
             "I would like to start again",
-            "Reset",
             "can we start this again",
             "lets start from the beginning",
             "forget all of that",
             "let us start over",
             "can we restart?",
-            "restart",
             "can we begin again?"
         ],
         "responses": [

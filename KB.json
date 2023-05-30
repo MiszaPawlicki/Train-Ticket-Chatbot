@@ -214,25 +214,25 @@
             "May I have a ticket for the train to #destination?",
             "I need to travel to #destination by train. Can I buy a ticket?",
             "I'd like to purchase a ticket for the train that goes to #destination.",
-            "Can I buy a train ticket to #destination from you?",
-            "I'm hoping to travel by train to #destination. Can I buy a ticket?",
-            "I want to buy a train ticket for #destination.",
-            "I'm interested in buying a ticket to #destination for the train.",
-            "Can you help me buy a train ticket to #destination?",
-            "Is it possible to get a train ticket for #destination?",
-            "I want to travel by train to #destination. Can you sell me a ticket?",
-            "I need to purchase a train ticket for #destination. Can you help me?",
-            "Train ticket for the journey to #destination, please.",
-            "Can I purchase a ticket for the train that goes to #destination?",
-            "Ticket for the train journey to #destination, please.",
-            "I'm looking for a train ticket to #destination. Can you help me?",
-            "May I buy a train ticket to #destination from you?",
-            "I'd like to buy a ticket for the train that goes to #destination.",
-            "Can you sell me a ticket for the train to #destination?",
-            "I'm interested in purchasing a train ticket to #destination.",
-            "I want to travel by train to #destination. Can you help me purchase a ticket?",
-            "I need a ticket for the train journey to #destination. Can you assist me?",
-            "Train ticket required for #destination."
+            "can i buy a train ticket to #destination from you",
+            "im hoping to travel by train to #destination can i buy a ticket",
+            "i want to buy a train ticket for #destination",
+            "im interested in buying a ticket to #destination for the train",
+            "can you help me buy a train ticket to #destination",
+            "is it possible to get a train ticket for #destination",
+            "i want to travel by train to #destination Can you sell me a ticket",
+            "i need to purchase a train ticket for #destination can you help me",
+            "train ticket for the journey to #destination please",
+            "can I purchase a ticket for the train that goes to #destination",
+            "ticket for the train journey to #destination please",
+            "im looking for a train ticket to #destination Can you help me",
+            "may I buy a train ticket to #destination from you",
+            "id like to buy a ticket for the train that goes to #destination",
+            "can you sell me a ticket for the train to #destination",
+            "im interested in purchasing a train ticket to #destination",
+            "i want to travel by train to #destination Can you help me purchase a ticket",
+            "i need a ticket for the train journey to #destination Can you assist me",
+            "train ticket required for #destination"
         ],
         "responses": [
             "When and where will you be departing from?"
@@ -392,42 +392,88 @@
             "there is a problem with my current journey"
         ],
         "responses": [
-            "Which train are you currently on?",
-            "Where is your train at currently?",
-            "How long is the delay?",
-            "Where is your destination?"
+            "What was your origin, destination and original arrival time for this journey?"
         ]
     },
     "delayed_train_only_origin": {
-    "patterns": [
-
-        ],
-    "responses": [
-
-        ]
+        "patterns": [
+            "my train from #origin has been delayed",
+            "when is my train from #origin meant to arrive now",
+            "can you tell me when my train from #origin is getting in?",
+            "im afraid there is a delay with my train from #origin",
+            "do you have any information on the revised arrival time for my train from #origin",
+            "could you please let me know the updated estimated arrival time for my train from #origin",
+            "i just received word that my train from #origin is experiencing a delay",
+            "is there any update on the arrival time of my train from #origin",
+            "im curious to know if there have been any changes in the expected arrival time for my train from #origin",
+            "could you provide me with the latest information regarding the arrival of my train from #origin",
+            "im wondering if you could inform me about the current status and expected arrival time of my train from #origin",
+            "is there a new estimated time of arrival for my train from #origin",
+            "could you please check if there are any updates on the arrival time for my train from #origin",
+            "when is my train from #origin getting in",
+            "my train from #origin has been delayed when am i getting in"
+            ],
+        "responses": [
+            "What was the destination and original arrival time of this journey?"
+            ]
     },
     "delayed_train_only_destination": {
         "patterns": [
-
+            "my train to #destination has been delayed",
+            "do you have any information on the revised arrival time for my train to #destination",
+            "can you please let me know the updated estimated arrival time for my train to #destination",
+            "unfortunately the arrival of my train to #destination is experiencing a delay",
+            "is there any update on the expected arrival time of my train to #destination",
+            "im curious to know if there have been any changes in the estimated arrival time for my train to #destination",
+            "could you provide me with the latest information regarding the arrival of my train to #destination",
+            "im wondering if you could inform me about the current status and expected arrival time of my train to #destination",
+            "is there a new estimated time of arrival for my train to #destination",
+            "could you please check if there are any updates on the arrival time for my train to #destination",
+            "when is my train to #destination getting in",
+            "my train has been delayed when am i getting to #destination"
         ],
         "responses": [
-
+            "What was the origin and original arrival time of this journey?"
         ]
     },
     "delayed_train_only_time": {
         "patterns": [
-
+            "my train for #arrival_time has been delayed",
+            "there has been a delay with my train that was supposed to arrive at #arrival_time",
+            "can you please provide me with information about the delay of my train scheduled for #arrival_time",
+            "i just received notification that my train for #arrival_time is experiencing a delay",
+            "is there any update on the revised arrival time for my train scheduled for #arrival_time",
+            "im interested in knowing if there have been any changes in the expected arrival time for my train for #arrival_time",
+            "could you please share the latest details regarding the delay of my train for #arrival_time",
+            "im wondering if you have any information about the current status and estimated arrival time of my train for #arrival_time",
+            "is there a new anticipated time of arrival for my train scheduled for #arrival_time",
+            "could you please check for updates regarding the delay of my train planned for #arrival_time"
         ],
         "responses": [
-
+            "What was the origin and destination of this journey?"
         ]
     },
     "delayed_train_destination_wtih_origin": {
         "patterns": [
+            "my train from #origin to #destination has been delayed",
+            "when is my arrival time for the train from #origin to #destination",
+            "when can i expect to arrive at #destination from #origin",
+            "i have just been told about a delay from #origin to #destination",
+            "the journey from #origin to #destination is experiencing a delay",
+            "what is the estimated time of arrival for my train from #origin to #destination",
+            "could you please provide me with an approximate arrival time at #destination from #origin",
+            "i was just informed that there is a delay on the train route from #origin to #destination",
+            "the train schedule from #origin to #destination has been disrupted causing a delay",
+            "do you have my arrival time after the delay of my train traveling from #origin to #destination",
+            "is there a revised arrival time for the train from #origin to #destination due to the delay",
+            "i need to know the updated arrival time at #destination from #origin as my journey is delayed",
+            "the train service from #origin to #destination is currently running behind schedule",
+            "ive received news about a delay on the route from #origin to #destination when will i get in",
+            "ive been told my train from #origin to #destination has been delayed when will i arrive"
 
         ],
         "responses": [
-
+            "When was the original arrival time of this journey?"
         ]
     },
     "delayed_train_destination_wtih_time": {

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import NLP
 import pyttsx3
+import threading
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -13,8 +14,8 @@ def speak(text):
 
 @app.route("/")
 def home():
-    #Speaks before loading and delays the system, not sure if we should just skip the intro message or not.
-    #speak("Hi, I am your personal ticket assistant! How can I help you today?")
+    speach_thread = threading.Thread(target=speak, args=("Hi, I am your personal ticket assistant! How can I help you today?",))
+    speach_thread.start()
     return render_template("index.html")
 
 
@@ -22,7 +23,8 @@ def home():
 def get_bot_response():
     userText = request.args.get('msg')
     response = NLP.generate_response(userText)
-    speak(response)
+    talk_after = threading.Thread(target=speak, args=(response,))
+    talk_after.start()
     return response
 
 if __name__ == "__main__":

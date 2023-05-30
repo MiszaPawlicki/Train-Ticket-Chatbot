@@ -362,15 +362,25 @@
     },
     "reset": {
         "patterns": [
-            "I would like to start again",
-            "Reset",
+            "i would like to start again",
+            "reset",
             "can we start this again",
             "lets start from the beginning",
             "forget all of that",
             "let us start over",
-            "can we restart?",
+            "can we restart",
             "restart",
-            "can we begin again?"
+            "can we begin again",
+            "i want to begin anew",
+            "start from scratch please",
+            "is it possible to reset everything",
+            "lets initiate a fresh start",
+            "please erase all previous progress",
+            "can we wipe the slate clean and start over",
+            "id like to hit the reset button",
+            "lets go back to square one",
+            "can we have a do over",
+            "im requesting a fresh beginning"
         ],
         "responses": [
             "Okay, everything has been reset.",
@@ -478,26 +488,59 @@
     },
     "delayed_train_destination_wtih_time": {
         "patterns": [
-
+            "my train to #destination was meant to get in at #arrival_time when will i arrive now",
+            "my train to #detination was delayed how much later than #arrival_time will i get in",
+            "my train heading towards #destination was scheduled to arrive at #arrival_time any idea about the revised arrival time",
+            "i was expecting to reach #destination on time at #arrival_time but my train got delayed whats the new estimated arrival time",
+            "the train i boarded was supposed to reach #destination at #arrival_time but it's running late can you tell me the updated arrival time",
+            "i had a train to catch and it was supposed to arrive at #arrival_time however theres been a delay how much longer until I reach #destination",
+            "i planned my journey to #destination with the train arriving at #arrival_time unfortunately it's delayed can you inform me about the revised arrival time",
+            "my train was originally scheduled to arrive at #arrival_time for #destination but it's experiencing a delay how much later will I get in now",
+            "the train bound for #destination was meant to get me there by #arrival_time but its delayed can you provide an estimate of the new arrival time",
+            "i anticipated reaching #destination on time at #arrival_time but my train got delayed could you let me know when i can expect to arrive now",
+            "the train i boarded was initially scheduled to arrive at #arrival_time for #destination but it's running behind schedule how much longer until i reach now",
+            "i was hoping to arrive at #destination by #arrival_time on my train but it's delayed any idea about the new estimated arrival time"
         ],
         "responses": [
-
+            "What was the origin of this journey?"
         ]
     },
     "delayed_train_origin_with_time": {
         "patterns": [
-
+            "my train from #origin was supposed to get in at #arrival_time when is it arriving now",
+            "the train from #origin was delayed how much later than #arrival_time will i get in at",
+            "my train from #origin was supposed to get in at #arrival_time can you please provide an updated arrival time",
+            "when is my train from #origin expected to arrive now the original arrival time was #arrival_time",
+            "i was supposed to reach my destination at #arrival_time but my train from #origin is delayed what is the new estimated arrival time",
+            "can you give me the revised arrival time for the train from #origin it was initially scheduled to arrive at #arrival_time",
+            "the train from #origin was supposed to reach at #arrival_time but it's delayed could you inform me about the new arrival time",
+            "what is the current expected arrival time for my train from #origin the original scheduled time was #arrival_time but its delayed",
+            "i need information about the delayed train from #origin what is the updated arrival time compared to the initial #arrival_time",
+            "how much later than the original #arrival_time will i be getting in at my destination the train from #origin is delayed",
+            "could you tell me the time difference between the delayed arrival of the train from #origin and the original #arrival_time?",
+            "the train from #origin is running late can you inform me about the delay duration in reaching my destination compared to the expected #arrival_time"
         ],
         "responses": [
-
+            "What was the destination of this journey?"
         ]
     },
     "delayed_train_all_details": {
         "patterns": [
-
+            "my train from #origin to #destination was supposed to arrive at #arrival_time but there has been a delay",
+            "my journey from #origin to #destination has been delayed will i arrive later than #arrival_time",
+            "the train from #origin to #destination was expected to arrive at #arrival_time but there is a delay",
+            "there has been a delay in my journey from #origin to #destination the original arrival time was #arrival_time",
+            "i was supposed to reach #destination from #origin at #arrival_time but my train is delayed could you provide an update",
+            "the scheduled arrival time for my train from #origin to #destination was #arrival_time but it is delayed can you give me the new expected time",
+            "my journey from #origin to #destination is experiencing a delay will i arrive later than the initially estimated #arrival_time",
+            "due to a delay my train from #origin to #destination wont arrive at the expected #arrival_time how much later can i anticipate reaching my destination",
+            "the train journey from #origin to #destination has been delayed can you inform me if i will arrive later than the designated #arrival_time",
+            "im currently on a train from #origin to #destination and theres a delay is it likely that i will arrive later than the scheduled #arrival_time",
+            "theres been a delay in my journey from #origin to #destination can you provide me with an updated arrival time compared to the original #arrival_time",
+            "my train from #origin to #destination is running late and im concerned about arriving later than the initial #arrival_time can you provide me with any information"
         ],
         "responses": [
-
+            "Your new expected arrival time is #predicted_time"
         ]
     }
 }

@@ -23,8 +23,14 @@ def home():
 def get_bot_response():
     userText = request.args.get('msg')
     response = NLP.generate_response(userText)
-    talk_after = threading.Thread(target=speak, args=(response,))
-    talk_after.start()
+    if ("<" in response):
+        stop = response.find("<")
+        final_msg = response[0:stop]
+        talk_after = threading.Thread(target=speak, args=(final_msg,))
+        talk_after.start()
+    else:
+        talk_after = threading.Thread(target=speak, args=(response,))
+        talk_after.start()
     return response
 
 if __name__ == "__main__":

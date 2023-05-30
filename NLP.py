@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 import datetime as dtime
 
-
+import Prediction
 import scraper
 
 nlp = spacy.load('en_core_web_sm')
@@ -33,6 +33,11 @@ active_question = {'time': False, 'date': False, 'return-time': False, 'return-d
 #journey details
 journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None, 'return-date': None, 'return': None}
 
+#delay details
+delay_journey = {'destination': None, 'time': None, 'delay': None}
+
+#delay_questions
+active_delay_question = {'active': False, 'destination': False, 'time': False, 'delay': False}
 def clean_input(user_input):
     '''
     Function to lower and remove punctuation from a string
@@ -476,6 +481,69 @@ def check_questions(user_input, intent):
     print(journey)
     return None
 
+def check_delay_questions(user_input):
+    # origin station
+    if(active_delay_question['delay']):
+
+        #obtain minutes in string
+        num_regex = r'\d+'
+        match = re.search(num_regex, user_input)
+        try:
+            delay_in_minutes = int(match.group())
+        except:
+            return "How many minutes delayed are you?"
+        if delay_in_minutes:
+            delay_journey['delay'] = delay_in_minutes
+            active_delay_question['delay'] = False
+        else:
+            return "How many minutes delayed are you?"
+
+    if (active_delay_question['destination']):
+        # check if info in userinput
+        journey_details = find_station_in_sentence(user_input)
+
+        if journey_details['destinations']:
+            active_delay_question['destination'] = False
+            delay_journey['destination'] = journey_details['destinations']
+            print(journey)
+        elif journey_details['unspecified']:
+            active_delay_question['destination'] = False
+            delay_journey['destination'] = journey_details['unspecified']
+
+        # if not return the question
+        else:
+            return "When and where is your train scheduled to arrive to?"
+
+    # time
+    if (active_delay_question['time']):
+        # check if info in userinput
+        time_details = infer_time_and_date(user_input)
+        print(time_details)
+
+        if (time_details):
+            # check if time obtained
+            if (time_details['time'] and not delay_journey['time']):
+                delay_journey['time'] = time_details['time']
+                active_delay_question['time'] = False
+                delay_journey['date'] = datetime.today()
+
+
+
+            # return appropriate response
+            if not delay_journey['time']:
+                return "What time will you arrive?"
+
+
+        else:
+            return "When will you arrive?"
+
+    if active_delay_question['active'] and all(value == False for key, value in active_delay_question.items() if key != 'active'):
+
+        prediction = Prediction.make_prediction(delay_journey)
+        active_delay_question['active'] = False
+        return "The train is estimated to arrive at: " + str(prediction)
+
+    return None
 ## MAIN FUNCTION ##
 
 def full_details_response(journey_details):
@@ -664,6 +732,14 @@ def process_request(user_input,intent):
         print(journey_details)
         return full_details_response(journey_details)
 
+    elif intent == "delayed_train_no_details":
+        active_delay_question['active'] = True
+        active_delay_question['destination'] = True
+        active_delay_question['time'] = True
+        active_delay_question['delay'] = True
+        return get_response(intent)
+
+
 
     return "no response implemented for: "+intent
 def generate_response(user_input):
@@ -677,19 +753,29 @@ def generate_response(user_input):
     if intent == "reset":
         global journey
         global active_question
-
+        global delay_journey
+        global active_delay_question
         # active questions
         active_question = {'time': False, 'date': False, 'return-time': False, 'return-date': False, 'origin': False,
                            'return': False, 'active': False, 'multiple-origins': False, 'multiple-destinations': False}
         # journey details
         journey = {'origin': None, 'destination': None, 'time': None, 'date': None, 'return-time': None,
                    'return-date': None, 'return': None}
+
+        # delay details
+        delay_journey = {'destination': None, 'time': None, 'delay': None}
+
+        # delay_questions
+        active_delay_question = {'active': False, 'destination': False, 'time': False, 'delay': False}
         return get_response(intent)
     else:
         intent = None
 
     #check if any questions are being asked
     questions = check_questions(user_input, intent)
+    if questions==None:
+        questions = check_delay_questions(user_input)
+
     # inferring intent using the NN
     intent = predict_intent(user_input)  # check_intent(user_input)
     if(questions):

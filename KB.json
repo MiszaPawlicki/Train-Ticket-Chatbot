@@ -388,7 +388,7 @@
             "The journey details have been reset"
         ]
     },
-    "delayed_train_no details": {
+    "delayed_train_no_details": {
         "patterns": [
             "my train is late",
             "i think my train is delayed",
@@ -402,7 +402,7 @@
             "there is a problem with my current journey"
         ],
         "responses": [
-            "What was your origin, destination and original arrival time for this journey?"
+            "How many minutes delayed are you?"
         ]
     },
     "delayed_train_only_origin": {

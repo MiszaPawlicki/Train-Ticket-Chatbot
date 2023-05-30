@@ -330,7 +330,7 @@ def time_difference(rid, end_location):
 
     return time_difference.seconds
 
-def test_prediction():
+def prediction_testing():
     file = sqlite3.connect('prediction data/test.sqlite')
     from_file = pd.read_sql_query(" SELECT * FROM Train_data", file)
     y = []
@@ -420,7 +420,5 @@ def main():
 
     #test_details.get("destination")
 
-
-
-if __name__ == "__main__":
-    main()
+deets = {'destination': [{'stationName': 'Southampton Central', 'lat': 50.907742, 'long': -1.413983, 'crsCode': 'SOU'}], 'time': datetime.time(8, 0), 'delay': 10, 'date': datetime.datetime(2023, 5, 30, 22, 42, 2, 530642)}
+print(make_prediction(deets))

@@ -39,15 +39,15 @@
     const chatbotForm = get(".chatbot-inputarea");
     const chatbotInput = get(".chatbot-input");
     const chatbotChat = get(".chatbot-chat");
-    const BOT_IMG = "../static/styles/cartoon_train2.jpg";
-    const PERSON_IMG = "../static/styles/user.png";
-    const BOT_NAME = "Ticket Assistant";
-    const PERSON_NAME = "You";
+    const chatbot_image = "../static/styles/cartoon_train2.jpg";
+    const user_image = "../static/styles/user.png";
+    const chatbot_name = "Ticket Assistant";
+    const user_name = "You";
     chatbotForm.addEventListener("submit", event => {
       event.preventDefault();
       const msgText = chatbotInput.value;
       if (!msgText) return;
-      appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
+      appendMessage(user_name, user_image, "right", msgText);
       chatbotInput.value = "";
       botResponse(msgText);
     });
@@ -72,7 +72,7 @@
         console.log(rawText);
         console.log(data);
         const msgText = data;
-        appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
+        appendMessage(chatbot_name, chatbot_image, "left", msgText);
       });
     }
     function get(selector, root = document) {

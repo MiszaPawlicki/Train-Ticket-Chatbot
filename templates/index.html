@@ -10,14 +10,13 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
-  <!-- partial:index.partial.html -->
-  <section class="msger">
-    <header class="msger-header">
-      <div class="msger-header-title">
+  <section class="chatbot">
+    <header class="chatbot-header">
+      <div class="chatbot-header-title">
         Ticket Assistant
       </div>
     </header>
-    <main class="msger-chat">
+    <main class="chatbot-chat">
       <div class="msg left-msg">
         <div class="msg-img" style="background-image: url(../static/styles/cartoon_train2.jpg)"></div>
         <div class="msg-bubble">
@@ -30,31 +29,29 @@
         </div>
       </div>
     </main>
-    <form class="msger-inputarea">
-      <input type="text" class="msger-input" id="textInput" placeholder="Enter your message...">
-      <button type="submit" class="msger-send-btn">Send</button>
+    <form class="chatbot-inputarea">
+      <input type="text" class="chatbot-input" id="textInput" placeholder="Enter message..">
+      <button type="submit" class="chatbot-send-btn">Send</button>
     </form>
   </section>
-  <!-- partial -->
   <script src='https://use.fontawesome.com/releases/v5.0.13/js/all.js'></script>
   <script>
-    const msgerForm = get(".msger-inputarea");
-    const msgerInput = get(".msger-input");
-    const msgerChat = get(".msger-chat");
+    const chatbotForm = get(".chatbot-inputarea");
+    const chatbotInput = get(".chatbot-input");
+    const chatbotChat = get(".chatbot-chat");
     const BOT_IMG = "../static/styles/cartoon_train2.jpg";
     const PERSON_IMG = "../static/styles/user.png";
     const BOT_NAME = "Ticket Assistant";
     const PERSON_NAME = "You";
-    msgerForm.addEventListener("submit", event => {
+    chatbotForm.addEventListener("submit", event => {
       event.preventDefault();
-      const msgText = msgerInput.value;
+      const msgText = chatbotInput.value;
       if (!msgText) return;
       appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
-      msgerInput.value = "";
+      chatbotInput.value = "";
       botResponse(msgText);
     });
     function appendMessage(name, img, side, text) {
-      //   Simple solution for small apps
       const msgHTML = `
 <div class="msg ${side}-msg">
   <div class="msg-img" style="background-image: url(${img})"></div>
@@ -67,11 +64,10 @@
   </div>
 </div>
 `;
-      msgerChat.insertAdjacentHTML("beforeend", msgHTML);
-      msgerChat.scrollTop += 500;
+      chatbotChat.insertAdjacentHTML("beforeend", msgHTML);
+      chatbotChat.scrollTop += 500;
     }
     function botResponse(rawText) {
-      // Bot Response
       $.get("/get", { msg: rawText }).done(function (data) {
         console.log(rawText);
         console.log(data);
@@ -79,7 +75,6 @@
         appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
       });
     }
-    // Utils
     function get(selector, root = document) {
       return root.querySelector(selector);
     }

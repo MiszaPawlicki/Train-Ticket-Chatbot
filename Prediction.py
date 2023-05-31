@@ -410,7 +410,7 @@ def main():
     input_details = {'destination': [{'stationName': 'Weymouth', 'lat': 50.61515, 'long': -2.455103, 'crsCode': 'WEY'}],
                     'time': datetime.time(8, 0), 'delay': 10,
                     'date': datetime.datetime(2023, 5, 30, 20, 24, 34, 924684)}
-    print(make_prediction(input_details))
+    #print(make_prediction(input_details))
 
     #rid = predict_using_params(day_of_month=5, first_station_dev="WATRLMN",boolean_weekday=True,on_peak=True) #input parameters into this function
     #print(rid)
@@ -421,4 +421,4 @@ def main():
     #test_details.get("destination")
 
 deets = {'destination': [{'stationName': 'Southampton Central', 'lat': 50.907742, 'long': -1.413983, 'crsCode': 'SOU'}], 'time': datetime.time(8, 0), 'delay': 10, 'date': datetime.datetime(2023, 5, 30, 22, 42, 2, 530642)}
-print(make_prediction(deets))
+#print(make_prediction(deets))
